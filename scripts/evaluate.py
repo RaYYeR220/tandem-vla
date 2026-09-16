@@ -13,7 +13,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tandem.eval.run_eval import EvalConfig, run_eval, to_markdown  # noqa: E402
+from tandem.eval.run_eval import (  # noqa: E402
+    EvalConfig,
+    resummarize,
+    run_eval,
+    to_markdown,
+)
 
 
 def main() -> int:
@@ -31,6 +36,11 @@ def main() -> int:
         default=None,
         help="read the world from the cameras through this OpenVINO IR instead of from "
              "privileged simulator state",
+    )
+    ap.add_argument(
+        "--resummarize",
+        action="store_true",
+        help="rebuild the scorecard from an existing episodes.json instead of re-running",
     )
     ap.add_argument("--out", type=Path, default=Path("results/eval"))
     args = ap.parse_args()
@@ -52,8 +62,17 @@ def main() -> int:
         speed=args.speed,
         perception_ir=args.perception,
     )
-    print(f"Running {len(cfg.seeds)} seeds at DR scale {cfg.dr_scale} ...")
-    summary = run_eval(cfg, out_dir=args.out)
+    if args.resummarize:
+        import json
+
+        summary = resummarize(args.out / "episodes.json", cfg)
+        (args.out / "scorecard.json").write_text(
+            json.dumps(summary, indent=2, default=str), encoding="utf-8"
+        )
+        (args.out / "scorecard.md").write_text(to_markdown(summary), encoding="utf-8")
+    else:
+        print(f"Running {len(cfg.seeds)} seeds at DR scale {cfg.dr_scale} ...")
+        summary = run_eval(cfg, out_dir=args.out)
     print()
     print(to_markdown(summary))
     print(f"Written to {args.out}/")

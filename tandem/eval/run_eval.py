@@ -100,6 +100,37 @@ def run_eval(cfg: EvalConfig, *, out_dir: Path | None = None, verbose: bool = Tr
     return summary
 
 
+class _Replay:
+    """Minimal stand-in so a saved episodes.json can be re-summarised without re-running."""
+
+    def __init__(self, d: dict):
+        self.seed = d["seed"]
+        self.score = d["score"]
+        self.replans = d.get("replans", 0)
+        self.refusals = d.get("refusals", [])
+        self.seconds = d.get("seconds", 0.0)
+        self._handoffs = d.get("handoffs", {})
+        self.steps = [
+            type("S", (), {
+                "skill": st["skill"],
+                "ok": st["ok"],
+                "attempts": st.get("attempts", 1),
+                "result": st.get("result"),
+                "verdict": st.get("verdict", {}),
+            })()
+            for st in d.get("steps", [])
+        ]
+
+    def handoff_summary(self) -> dict:
+        return self._handoffs
+
+
+def resummarize(episodes_json: Path, cfg: EvalConfig) -> dict:
+    """Rebuild the scorecard from a saved run. No simulator, no randomness, same numbers."""
+    data = json.loads(episodes_json.read_text(encoding="utf-8"))
+    return summarize([_Replay(d) for d in data], cfg)
+
+
 def summarize(episodes, cfg: EvalConfig) -> dict:
     n = len(episodes)
     per_goal = {
@@ -115,15 +146,26 @@ def summarize(episodes, cfg: EvalConfig) -> dict:
         for mode, c in e.handoff_summary().items():
             handoff_modes[mode] = handoff_modes.get(mode, 0) + c
         for s in e.steps:
-            st = step_stats.setdefault(s.skill, {"attempted": 0, "ok": 0})
-            st["attempted"] += 1
-            st["ok"] += int(s.ok)
+            st = step_stats.setdefault(
+                s.skill,
+                {"planned": 0, "executed": 0, "ok": 0, "first_try": 0, "gate_blocked": 0},
+            )
+            st["planned"] += 1
+            if s.attempts == 0:
+                # The gate stopped it before a joint moved; it never reached the executor.
+                st["gate_blocked"] += 1
+            else:
+                st["executed"] += 1
+                st["ok"] += int(s.ok)
+                if s.ok and s.attempts == 1:
+                    st["first_try"] += 1
             if not s.ok:
                 code = (s.result or {}).get("code") or s.verdict.get("code", "REFUSED")
                 key = f"{s.skill}:{code}"
                 failure_codes[key] = failure_codes.get(key, 0) + 1
     for st in step_stats.values():
-        st["rate"] = round(st["ok"] / max(st["attempted"], 1), 3)
+        st["rate"] = round(st["ok"] / max(st["executed"], 1), 3)
+        st["first_try_rate"] = round(st["first_try"] / max(st["executed"], 1), 3)
 
     return {
         "config": {
@@ -202,10 +244,24 @@ def to_markdown(s: dict) -> str:
     ]
     for g, v in s["subgoals"].items():
         lines.append(f"| {g} | {v['count']}/{cfg['n']} | {v['rate']:.0%} |")
-    lines += ["", "## Per-skill reliability", "", "| skill | attempted | succeeded | rate |",
-              "| --- | --- | --- | --- |"]
+    lines += [
+        "",
+        "## Per-skill reliability",
+        "",
+        "Read the denominator carefully. `planned` counts every time the step appeared in a plan,",
+        "including after a re-plan, so a seed that keeps retrying one awkward grasp contributes",
+        "many rows. `gate blocked` are the ones the gate stopped before a joint moved — those",
+        "never reached the executor and are not counted against it. `rate` is over the steps that",
+        "actually executed.",
+        "",
+        "| skill | planned | gate blocked | executed | succeeded | rate | first try |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
     for k, v in sorted(s["skills"].items()):
-        lines.append(f"| {k} | {v['attempted']} | {v['ok']} | {v['rate']:.0%} |")
+        lines.append(
+            f"| {k} | {v['planned']} | {v['gate_blocked']} | {v['executed']} | {v['ok']} | "
+            f"{v['rate']:.0%} | {v['first_try_rate']:.0%} |"
+        )
     if s["failures"]:
         lines += ["", "## Failure modes, by count", "", "| skill : code | count |", "| --- | --- |"]
         for k, v in s["failures"].items():

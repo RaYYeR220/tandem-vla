@@ -202,19 +202,19 @@ scripts/           every command a reviewer needs
 <!-- RESULTS:START -->
 **Safety gate — 24/24 cases.** 12/12 refused correctly, 4/4 repaired rather than refused, 8/8 legitimate steps allowed through — the negative control, without which the refusal score would mean nothing.
 
-**Task — 16 randomized seeds, mean subgoal fraction 0.64.**
+**Task — 20 randomized seeds, mean subgoal fraction 0.64.**
 
 | subgoal | rate |
 | --- | --- |
-| drawer_opened | 16/16 (100%) |
-| plate_placed | 8/16 (50%) |
-| fork_placed | 14/16 (88%) |
-| spoon_placed | 15/16 (94%) |
-| mug_placed | 9/16 (56%) |
-| carton_emptied | 10/16 (62%) |
-| water_in_cup | 0/16 (0%) |
+| drawer_opened | 20/20 (100%) |
+| plate_placed | 18/20 (90%) |
+| fork_placed | 18/20 (90%) |
+| spoon_placed | 13/20 (65%) |
+| mug_placed | 11/20 (55%) |
+| carton_emptied | 10/20 (50%) |
+| water_in_cup | 0/20 (0%) |
 
-Hand-offs performed: `{'relay': 66}`. Gate refusals raised during execution: 111. Re-plans: 48.
+Hand-offs performed: `{'relay': 86}`. Gate refusals raised during execution: 352. Re-plans: 200.
 
 **Quantization.** Perception and the distilled policy are exported to OpenVINO IR in FP32, FP16 and NNCF INT8, with the accuracy cost of each measured on held-out seeds rather than assumed — see `PROOF.md` section 4.
 <!-- RESULTS:END -->
