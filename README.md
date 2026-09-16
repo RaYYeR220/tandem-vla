@@ -202,6 +202,15 @@ web/               landing page and live dashboard
 scripts/           every command a reviewer needs
 ```
 
+## Ten seeds, one instruction
+
+![Ten randomized seeds](results/seeds.mp4)
+
+`results/seeds.mp4` plays the same instruction on ten randomized seeds at once — different object
+positions and yaws, masses, frictions, sizes, lighting and materials in every tile, the same
+sentence in all of them. Each tile carries its seed and its subgoal tally. Rebuild it with
+`python scripts/record_seed_montage.py --seeds 10`.
+
 ## Results
 
 <!-- RESULTS:START -->
