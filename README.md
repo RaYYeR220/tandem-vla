@@ -1,3 +1,5 @@
+![Tandem — two SO-101 arms setting a table in MuJoCo](assets/cover.jpg)
+
 # Tandem
 
 **Two robot arms set a dinner table from a spoken instruction — and refuse the ones they can't ground.**
