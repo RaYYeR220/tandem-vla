@@ -5,7 +5,9 @@ scipy>=1.14
 
 # Intel inference
 openvino>=2026.3.0
+openvino-genai>=2026.3.0
 nncf>=2.14
+psutil>=6.0
 
 # Learned components (CPU wheels by default; install a CUDA build to train on a GPU)
 torch>=2.5
@@ -18,6 +20,7 @@ imageio-ffmpeg>=0.5
 
 # Voice
 speechmatics-rt>=1.1.0
+requests>=2.32
 sounddevice>=0.5
 python-dotenv>=1.0
 
@@ -28,3 +31,9 @@ uvicorn>=0.32
 # Tooling
 tqdm>=4.66
 pytest>=8.0
+
+# Only needed to re-export the language model to OpenVINO IR (scripts/export_planner.py).
+# The stack runs without it: with no IR present the planner falls back to its keyword parser
+# and says so.
+# optimum-intel[openvino]>=1.27
+# transformers>=4.57,<5

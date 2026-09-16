@@ -685,16 +685,20 @@ class Executor:
         # enough to stop it turning -- so where the stream ends up is only known once the arm is
         # actually there. Tracking it with the other arm is what turns a spill into a pour.
         start_q = np.array(env.arm_target(arm))
-        for frac in (0.55, 0.78, 1.0):
+        # The first few fractions stay under the angle at which the carton starts to empty, so
+        # the cup is already tracking the real rim -- not the solved one -- before any water
+        # moves. Going straight to the final pose spills the lot during the transit.
+        for frac in (0.22, 0.36, 0.46, 0.54, 0.62, 0.71, 0.80, 0.90, 1.0):
             if self.aborted:
                 break
-            self.move_joint(arm, start_q + (chosen.qpos - start_q) * frac, 0.6)
+            self.move_joint(arm, start_q + (chosen.qpos - start_q) * frac, 0.45)
             self._track_spout(holder, source, target, hold_yaw)
-        for _ in range(9):
+            self.hold(0.12)
+        for _ in range(10):
             if self.aborted:
                 break
             self._track_spout(holder, source, target, hold_yaw)
-            self.hold(0.18)
+            self.hold(0.16)
         if staged.ok:
             self.move_joint(arm, staged.qpos, 1.0)
         self.hold(0.4)
@@ -716,9 +720,9 @@ class Executor:
         rim = env.object_pos(source) + axis * 0.030
         mouth = np.array(env.data.site_xpos[env.index.site[f"{target}_mouth"]])
         err = rim[:2] - mouth[:2]
-        if float(np.linalg.norm(err)) < 0.006:
+        if float(np.linalg.norm(err)) < 0.005:
             return
-        step = np.clip(err, -0.05, 0.05)
+        step = np.clip(err, -0.06, 0.06)
         want = env.object_pos(target)[:2] + step
         aim = np.array([want[0], want[1], layout.POUR_STATION_Z])
         if not layout.in_reach(holder, aim[:2]):
