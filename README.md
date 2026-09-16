@@ -2,6 +2,8 @@
 
 **Two robot arms set a dinner table from a spoken instruction — and refuse the ones they can't ground.**
 
+[Overview](https://rayyer220.github.io/tandem-vla/) · [Review in five minutes](JUDGES.md) · [Proof](PROOF.md) · [Honest limits](MOCKS.md)
+
 Tandem is an end-to-end bimanual manipulation stack built on two simulated
 [SO-101](https://github.com/TheRobotStudio/SO-ARM100) arms in MuJoCo. You say what you want.
 A language model parses the intent. A deterministic gate checks every planned step against the
