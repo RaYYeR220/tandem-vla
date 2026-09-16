@@ -46,10 +46,15 @@ on the way.
 the cup, the other brings the carton over it and tips past 100° — and the contents do leave the
 carton. They land roughly 8 cm away from a 37 mm opening. The cause is measured, not guessed: the
 carton rotates inside a ~12 N pinch during the tilt, so the achieved rim pose diverges from the
-solved one, and by the time the error can be observed the carton is already empty. Pre-aiming the
-cup at the predicted rim and tracking the rim during the tilt both failed to close the gap. This
-is why the scorecard scores `carton_emptied` and `water_in_cup` as two separate subgoals rather
-than one flag: the coordination works, the marksmanship does not.
+solved one. Three fixes were tried and measured, and all three failed: pre-aiming the cup at the
+rim predicted from the solved pose, re-solving the carton pose from the observed error, and
+tipping in nine stages with the cup tracking the spout between each. The residual stays around
+75–85 mm. This is why the scorecard scores `carton_emptied` and `water_in_cup` as two separate
+subgoals rather than one flag: the coordination works, the marksmanship does not.
+
+The honest read is that a reliable pour needs the carton held rigidly rather than pinched — a
+wrist-mounted fixture, or a grasp that constrains rotation about the jaw axis. That is a hardware
+answer to a hardware problem, and we did not have one.
 
 **The gripper envelope is smaller than it looks.** The SO-101's fingertips travel 133 mm apart,
 but the jaw faces close in well ahead of them; the real usable opening is about 50 mm. Every prop
