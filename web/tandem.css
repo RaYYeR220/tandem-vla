@@ -1,0 +1,253 @@
+/* Tandem — shared design tokens and components.
+   Direction: "Field Manual, Night Ops" (chosen from ui-variants/variant-02.html).
+   Display: Fragment Mono. Body: Archivo. Chamfered corners, never border-radius.
+   Ramp: paper/ink neutrals + teal (GO) + burnt-orange (REFUSE) + amber (EXECUTING). */
+
+:root {
+  --ink-0: #1c1b18;
+  --ink-1: #252420;
+  --ink-2: #33312b;
+  --ink-3: #57534a;
+  --paper-0: #fdfbf6;
+  --paper-1: #f4f1ea;
+  --paper-2: #e8e3d8;
+  --paper-3: #8a857a;
+
+  --teal-1: #0e3a33;
+  --teal-2: #1f6f63;
+  --teal-3: #3d9c8e;
+
+  --orange-1: #b23a0c;
+  --orange-2: #e14a0f;
+  --orange-3: #ff8a54;
+
+  --amber-1: #8a5a12;
+  --amber-2: #c07e1e;
+  --amber-3: #e8a33d;
+  --amber-4: #f2c777;
+
+  --font-display: "Fragment Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-body: "Archivo", ui-sans-serif, system-ui, sans-serif;
+
+  --gutter: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink-0);
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--paper-0);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+::selection { background: var(--teal-2); color: var(--paper-0); }
+
+/* ---------------------------------------------------------------- layout helpers */
+
+.bg-grid {
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 21px, rgba(253, 251, 246, 0.035) 22px),
+    repeating-linear-gradient(90deg, transparent, transparent 21px, rgba(253, 251, 246, 0.035) 22px);
+}
+
+.top-strip {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px clamp(var(--gutter), 4vw, 40px);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--paper-3);
+  border-bottom: 1px solid var(--ink-2);
+}
+.top-strip b { color: var(--paper-0); }
+.top-strip a.home-link { color: var(--teal-3); text-decoration: none; }
+.top-strip a.home-link:hover { color: var(--paper-0); }
+
+/* ---------------------------------------------------------------- type */
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--teal-3);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--teal-3); flex: none; }
+
+h1.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0;
+}
+h1.display em { font-style: normal; color: var(--orange-2); }
+
+p.sub {
+  font-size: clamp(15px, 1.4vw, 17px);
+  color: var(--paper-2);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.mono { font-family: var(--font-display); }
+
+/* ---------------------------------------------------------------- chamfered surfaces */
+
+.chamfer {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.chamfer-sm {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.panel {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-2);
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--ink-0);
+  background: var(--paper-0);
+  border: none;
+  padding: 15px 26px;
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.btn:hover { background: var(--teal-3); }
+.btn:disabled { background: var(--ink-3); color: var(--paper-3); cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--paper-0);
+  border: 1px solid var(--ink-3);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  padding: 10px 18px;
+  cursor: pointer;
+}
+.btn-ghost:hover { border-color: var(--teal-3); color: var(--teal-3); }
+.btn-ghost.danger:hover { border-color: var(--orange-2); color: var(--orange-3); }
+.btn-ghost.active { border-color: var(--teal-3); color: var(--teal-3); background: rgba(61, 156, 142, 0.1); }
+
+input, select {
+  font-family: var(--font-display);
+  font-size: 13px;
+  background: var(--ink-0);
+  color: var(--paper-0);
+  border: 1px solid var(--ink-2);
+  padding: 9px 10px;
+}
+input:focus, select:focus { outline: none; border-color: var(--teal-3); }
+label.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+}
+
+/* ---------------------------------------------------------------- verdict / status colour language */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+.tag::before { content: ""; width: 6px; height: 6px; background: currentColor; }
+.tag.go { color: var(--teal-3); }
+.tag.pending { color: var(--amber-3); }
+.tag.refuse { color: var(--orange-3); }
+.tag.idle { color: var(--paper-3); }
+
+/* ---------------------------------------------------------------- ink stamp (the REFUSE moment) */
+
+.stamp-wrap { position: relative; }
+.stamp {
+  transform: rotate(-8deg) scale(0);
+  opacity: 0;
+  transform-origin: center;
+}
+.stamp.fire { animation: stamp-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) forwards; }
+@keyframes stamp-in {
+  0% { opacity: 0; transform: rotate(-8deg) scale(2.4); }
+  55% { opacity: 1; transform: rotate(-8deg) scale(0.85); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+.stamp circle, .stamp path, .stamp rect { fill: none; stroke-width: 3; }
+.stamp text {
+  font-family: var(--font-display);
+  text-anchor: middle;
+  letter-spacing: 0.04em;
+}
+.stamp.go circle, .stamp.go path { stroke: var(--teal-3); }
+.stamp.go text { fill: var(--teal-3); }
+.stamp.rewrite circle, .stamp.rewrite path { stroke: var(--amber-3); }
+.stamp.rewrite text { fill: var(--amber-3); }
+.stamp.refuse circle, .stamp.refuse path { stroke: var(--orange-2); }
+.stamp.refuse text { fill: var(--orange-2); }
+.stamp.idle circle, .stamp.idle path { stroke: var(--ink-3); }
+.stamp.idle text { fill: var(--paper-3); }
+
+/* ---------------------------------------------------------------- scrollbars (webkit) */
+
+.scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll::-webkit-scrollbar-track { background: var(--ink-0); }
+.scroll::-webkit-scrollbar-thumb { background: var(--ink-3); }
+
+/* ---------------------------------------------------------------- misc */
+
+.hint { font-family: var(--font-display); font-size: 10.5px; color: var(--ink-3); }
+.readouts {
+  display: flex;
+  gap: clamp(16px, 3vw, 32px);
+  flex-wrap: wrap;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  color: var(--paper-3);
+}
+.readouts b { display: block; color: var(--teal-3); font-size: 18px; margin-bottom: 2px; }
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+  border-bottom: 1px solid var(--ink-2);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
