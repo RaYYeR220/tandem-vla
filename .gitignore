@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Trained weights, exported IR and collected data are rebuilt by the scripts in scripts/
+models/
+data/
+results/
+!results/.gitkeep
+
+# Local config
+.env
+*.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch
+*.log
+tmp/
+scratch/
+MUJOCO_LOG.TXT
+probe_*/
