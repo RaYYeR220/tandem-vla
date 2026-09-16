@@ -23,7 +23,7 @@ Every public statement this project makes, tagged by the evidence behind it. The
 | Grasps are decided by contact, not by proximity or attachment | **REPRODUCIBLE** | `TandemEnv.jaw_contacts` reads `data.contact`; `tandem/control/primitives.py::close_on_object` closes until the servo's tracking error reports load |
 | Episodes are reproducible from a single integer seed | **REPRODUCIBLE** | `tandem/sim/randomize.py`; re-running `scripts/evaluate.py` with the same seeds reproduces the flags |
 | Re-planning is state-derived, not scripted | **REPRODUCIBLE** | `tandem/eval/tasks.py::canonical_plan` is a pure function of the world state; the runner calls it again after a failure |
-| Task success rates across randomized seeds | **REPRODUCIBLE** | `python scripts/evaluate.py --seeds 20` — `PROOF.md §2`, including per-skill rates and the failure-mode histogram |
+| Task success rates across randomized seeds | **REPRODUCIBLE** | `python scripts/evaluate.py --seeds 20` — `PROOF.md` §2, including per-skill rates and the failure-mode histogram. Run twice end to end: one subgoal out of 140 moved between runs (`PROOF.md` §2b), and both runs are kept. |
 
 ## Intel and OpenVINO
 
