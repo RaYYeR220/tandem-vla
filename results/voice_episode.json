@@ -1,0 +1,792 @@
+{
+  "seed": 1,
+  "dr_scale": 1.0,
+  "voice": {
+    "info": {
+      "backend": "speechmatics",
+      "live": true,
+      "model": "enhanced",
+      "language": "en",
+      "has_api_key": true,
+      "url": "wss://eu2.rt.speechmatics.com/v2"
+    },
+    "instruction": "Set the table for one, please.",
+    "events": 12
+  },
+  "planner": {
+    "backend": "openvino",
+    "model": "planner-ov",
+    "device": "AUTO",
+    "precision": "INT4",
+    "stage_a_ms": 13074.8,
+    "latency_ms": 13074.8,
+    "tokens_per_s": 3.44,
+    "attempts": 1,
+    "salvaged": false,
+    "intent": {
+      "place": [
+        "plate",
+        "fork",
+        "spoon",
+        "mug"
+      ],
+      "pour": false,
+      "open_drawer": null,
+      "close_drawer": null,
+      "refuse": null,
+      "paraphrase": "set the table for one"
+    },
+    "refused": false,
+    "fell_back_from": null,
+    "valid": true,
+    "errors": [],
+    "replanned": false
+  },
+  "episode": {
+    "seed": 1,
+    "instruction": "Set the table for one, please.",
+    "plan": {
+      "goal_summary": "set the table for one",
+      "steps": [
+        {
+          "id": 1,
+          "skill": "pick",
+          "args": {
+            "arm": "left",
+            "object": "plate"
+          },
+          "rationale": "fetch the plate"
+        },
+        {
+          "id": 2,
+          "skill": "handoff",
+          "args": {
+            "from_arm": "left",
+            "to_arm": "right",
+            "object": "plate"
+          },
+          "rationale": "the left arm cannot reach the target, the right arm can"
+        },
+        {
+          "id": 3,
+          "skill": "place",
+          "args": {
+            "arm": "right",
+            "object": "plate",
+            "target": "slot_plate"
+          },
+          "rationale": "plate goes at slot_plate"
+        },
+        {
+          "id": 4,
+          "skill": "open_drawer",
+          "args": {
+            "arm": "left"
+          },
+          "rationale": "the fork is inside the drawer"
+        },
+        {
+          "id": 5,
+          "skill": "pick",
+          "args": {
+            "arm": "left",
+            "object": "fork"
+          },
+          "rationale": "fetch the fork"
+        },
+        {
+          "id": 6,
+          "skill": "handoff",
+          "args": {
+            "from_arm": "left",
+            "to_arm": "right",
+            "object": "fork"
+          },
+          "rationale": "the left arm cannot reach the target, the right arm can"
+        },
+        {
+          "id": 7,
+          "skill": "place",
+          "args": {
+            "arm": "right",
+            "object": "fork",
+            "target": "slot_fork"
+          },
+          "rationale": "fork goes at slot_fork"
+        },
+        {
+          "id": 8,
+          "skill": "pick",
+          "args": {
+            "arm": "left",
+            "object": "spoon"
+          },
+          "rationale": "fetch the spoon"
+        },
+        {
+          "id": 9,
+          "skill": "handoff",
+          "args": {
+            "from_arm": "left",
+            "to_arm": "right",
+            "object": "spoon"
+          },
+          "rationale": "the left arm cannot reach the target, the right arm can"
+        },
+        {
+          "id": 10,
+          "skill": "place",
+          "args": {
+            "arm": "right",
+            "object": "spoon",
+            "target": "slot_spoon"
+          },
+          "rationale": "spoon goes at slot_spoon"
+        },
+        {
+          "id": 11,
+          "skill": "pick",
+          "args": {
+            "arm": "left",
+            "object": "mug"
+          },
+          "rationale": "fetch the mug"
+        },
+        {
+          "id": 12,
+          "skill": "handoff",
+          "args": {
+            "from_arm": "left",
+            "to_arm": "right",
+            "object": "mug"
+          },
+          "rationale": "the left arm cannot reach the target, the right arm can"
+        },
+        {
+          "id": 13,
+          "skill": "place",
+          "args": {
+            "arm": "right",
+            "object": "mug",
+            "target": "slot_mug"
+          },
+          "rationale": "mug goes at slot_mug"
+        },
+        {
+          "id": 14,
+          "skill": "close_drawer",
+          "args": {
+            "arm": "left"
+          },
+          "rationale": "leave the workcell tidy"
+        },
+        {
+          "id": 15,
+          "skill": "home",
+          "args": {
+            "arm": "left"
+          },
+          "rationale": "retract clear of the table"
+        },
+        {
+          "id": 16,
+          "skill": "home",
+          "args": {
+            "arm": "right"
+          },
+          "rationale": "retract clear of the table"
+        }
+      ],
+      "instruction": "Set the table for one, please.",
+      "_meta": {
+        "backend": "openvino",
+        "model": "planner-ov",
+        "device": "AUTO",
+        "precision": "INT4",
+        "stage_a_ms": 13074.8,
+        "latency_ms": 13074.8,
+        "tokens_per_s": 3.44,
+        "attempts": 1,
+        "salvaged": false,
+        "intent": {
+          "place": [
+            "plate",
+            "fork",
+            "spoon",
+            "mug"
+          ],
+          "pour": false,
+          "open_drawer": null,
+          "close_drawer": null,
+          "refuse": null,
+          "paraphrase": "set the table for one"
+        },
+        "refused": false,
+        "fell_back_from": null,
+        "valid": true,
+        "errors": [],
+        "replanned": false
+      }
+    },
+    "steps": [
+      {
+        "step_id": 1,
+        "skill": "pick",
+        "args": {
+          "arm": "left",
+          "object": "plate"
+        },
+        "verdict": {
+          "step_id": 1,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "pick",
+          "arm": "left",
+          "ok": "True",
+          "code": "OK",
+          "detail": "plate at z=0.281",
+          "seconds": 1.34,
+          "extras": {
+            "object": "plate",
+            "z": 0.2807
+          }
+        },
+        "ok": true,
+        "seconds": 1.34
+      },
+      {
+        "step_id": 2,
+        "skill": "handoff",
+        "args": {
+          "from_arm": "left",
+          "to_arm": "right",
+          "object": "plate"
+        },
+        "verdict": {
+          "step_id": 2,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "handoff",
+          "arm": "right",
+          "ok": "True",
+          "code": "OK",
+          "detail": "plate changed arms via the shared zone (shared zone)",
+          "seconds": 1.91,
+          "extras": {
+            "object": "plate",
+            "mode": "relay",
+            "from": "left",
+            "to": "right"
+          }
+        },
+        "ok": true,
+        "seconds": 1.91
+      },
+      {
+        "step_id": 3,
+        "skill": "place",
+        "args": {
+          "arm": "right",
+          "object": "plate",
+          "target": "slot_plate"
+        },
+        "verdict": {
+          "step_id": 3,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "place",
+          "arm": "right",
+          "ok": true,
+          "code": "OK",
+          "detail": "plate on slot_plate (2 mm from centre)",
+          "seconds": 1.18,
+          "extras": {
+            "object": "plate",
+            "target": "slot_plate",
+            "err": 0.0022
+          }
+        },
+        "ok": true,
+        "seconds": 1.18
+      },
+      {
+        "step_id": 4,
+        "skill": "open_drawer",
+        "args": {
+          "arm": "left"
+        },
+        "verdict": {
+          "step_id": 4,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "open_drawer",
+          "arm": "left",
+          "ok": true,
+          "code": "OK",
+          "detail": "drawer at 94% open",
+          "seconds": 2.81,
+          "extras": {
+            "open_frac": 0.941
+          }
+        },
+        "ok": true,
+        "seconds": 2.81
+      },
+      {
+        "step_id": 5,
+        "skill": "pick",
+        "args": {
+          "arm": "left",
+          "object": "fork"
+        },
+        "verdict": {
+          "step_id": 5,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "pick",
+          "arm": "left",
+          "ok": "True",
+          "code": "OK",
+          "detail": "fork at z=0.262",
+          "seconds": 1.16,
+          "extras": {
+            "object": "fork",
+            "z": 0.2625
+          }
+        },
+        "ok": true,
+        "seconds": 1.16
+      },
+      {
+        "step_id": 6,
+        "skill": "handoff",
+        "args": {
+          "from_arm": "left",
+          "to_arm": "right",
+          "object": "fork"
+        },
+        "verdict": {
+          "step_id": 6,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "handoff",
+          "arm": "right",
+          "ok": "True",
+          "code": "OK",
+          "detail": "fork changed arms via the shared zone (shared zone)",
+          "seconds": 2.03,
+          "extras": {
+            "object": "fork",
+            "mode": "relay",
+            "from": "left",
+            "to": "right"
+          }
+        },
+        "ok": true,
+        "seconds": 2.03
+      },
+      {
+        "step_id": 7,
+        "skill": "place",
+        "args": {
+          "arm": "right",
+          "object": "fork",
+          "target": "slot_fork"
+        },
+        "verdict": {
+          "step_id": 7,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "place",
+          "arm": "right",
+          "ok": true,
+          "code": "OK",
+          "detail": "fork on slot_fork (13 mm from centre)",
+          "seconds": 1.1,
+          "extras": {
+            "object": "fork",
+            "target": "slot_fork",
+            "err": 0.0131
+          }
+        },
+        "ok": true,
+        "seconds": 1.1
+      },
+      {
+        "step_id": 8,
+        "skill": "pick",
+        "args": {
+          "arm": "left",
+          "object": "spoon"
+        },
+        "verdict": {
+          "step_id": 8,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "pick",
+          "arm": "left",
+          "ok": "True",
+          "code": "OK",
+          "detail": "spoon at z=0.262",
+          "seconds": 1.08,
+          "extras": {
+            "object": "spoon",
+            "z": 0.2624
+          }
+        },
+        "ok": true,
+        "seconds": 1.08
+      },
+      {
+        "step_id": 9,
+        "skill": "handoff",
+        "args": {
+          "from_arm": "left",
+          "to_arm": "right",
+          "object": "spoon"
+        },
+        "verdict": {
+          "step_id": 9,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "handoff",
+          "arm": "right",
+          "ok": "True",
+          "code": "OK",
+          "detail": "spoon changed arms via the shared zone (shared zone)",
+          "seconds": 2.02,
+          "extras": {
+            "object": "spoon",
+            "mode": "relay",
+            "from": "left",
+            "to": "right"
+          }
+        },
+        "ok": true,
+        "seconds": 2.02
+      },
+      {
+        "step_id": 10,
+        "skill": "place",
+        "args": {
+          "arm": "right",
+          "object": "spoon",
+          "target": "slot_spoon"
+        },
+        "verdict": {
+          "step_id": 10,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "place",
+          "arm": "right",
+          "ok": true,
+          "code": "OK",
+          "detail": "spoon on slot_spoon (33 mm from centre)",
+          "seconds": 0.93,
+          "extras": {
+            "object": "spoon",
+            "target": "slot_spoon",
+            "err": 0.0327
+          }
+        },
+        "ok": true,
+        "seconds": 0.93
+      },
+      {
+        "step_id": 11,
+        "skill": "pick",
+        "args": {
+          "arm": "left",
+          "object": "mug"
+        },
+        "verdict": {
+          "step_id": 11,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "pick",
+          "arm": "left",
+          "ok": "True",
+          "code": "OK",
+          "detail": "mug at z=0.280",
+          "seconds": 1.08,
+          "extras": {
+            "object": "mug",
+            "z": 0.2802
+          }
+        },
+        "ok": true,
+        "seconds": 1.08
+      },
+      {
+        "step_id": 12,
+        "skill": "handoff",
+        "args": {
+          "from_arm": "left",
+          "to_arm": "right",
+          "object": "mug"
+        },
+        "verdict": {
+          "step_id": 12,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "handoff",
+          "arm": "right",
+          "ok": false,
+          "code": "OUT_OF_REACH",
+          "detail": "mug changed arms via the shared zone (shared zone)",
+          "seconds": 2.73,
+          "extras": {
+            "object": "mug",
+            "mode": "relay",
+            "from": "left",
+            "to": "right"
+          }
+        },
+        "ok": false,
+        "seconds": 2.73
+      },
+      {
+        "step_id": 4,
+        "skill": "pick",
+        "args": {
+          "arm": "left",
+          "object": "mug"
+        },
+        "verdict": {
+          "step_id": 4,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 3,
+        "result": {
+          "skill": "pick",
+          "arm": "left",
+          "ok": false,
+          "code": "OUT_OF_REACH",
+          "detail": "cannot descend onto mug",
+          "seconds": 0.71
+        },
+        "ok": false,
+        "seconds": 2.63
+      },
+      {
+        "step_id": 4,
+        "skill": "pick",
+        "args": {
+          "arm": "left",
+          "object": "mug"
+        },
+        "verdict": {
+          "step_id": 4,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "pick",
+          "arm": "left",
+          "ok": "True",
+          "code": "OK",
+          "detail": "mug at z=0.280",
+          "seconds": 1.07,
+          "extras": {
+            "object": "mug",
+            "z": 0.2798
+          }
+        },
+        "ok": true,
+        "seconds": 1.07
+      },
+      {
+        "step_id": 5,
+        "skill": "handoff",
+        "args": {
+          "from_arm": "left",
+          "to_arm": "right",
+          "object": "mug"
+        },
+        "verdict": {
+          "step_id": 5,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "handoff",
+          "arm": "right",
+          "ok": "True",
+          "code": "OK",
+          "detail": "mug changed arms via the shared zone (shared zone)",
+          "seconds": 1.55,
+          "extras": {
+            "object": "mug",
+            "mode": "relay",
+            "from": "left",
+            "to": "right"
+          }
+        },
+        "ok": true,
+        "seconds": 1.55
+      },
+      {
+        "step_id": 6,
+        "skill": "place",
+        "args": {
+          "arm": "right",
+          "object": "mug",
+          "target": "slot_mug"
+        },
+        "verdict": {
+          "step_id": 6,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "place",
+          "arm": "right",
+          "ok": true,
+          "code": "OK",
+          "detail": "mug on slot_mug (1 mm from centre)",
+          "seconds": 0.79,
+          "extras": {
+            "object": "mug",
+            "target": "slot_mug",
+            "err": 0.0007
+          }
+        },
+        "ok": true,
+        "seconds": 0.79
+      },
+      {
+        "step_id": 7,
+        "skill": "home",
+        "args": {
+          "arm": "left"
+        },
+        "verdict": {
+          "step_id": 7,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "home",
+          "arm": "left",
+          "ok": true,
+          "code": "OK",
+          "detail": "",
+          "seconds": 0.16
+        },
+        "ok": true,
+        "seconds": 0.16
+      },
+      {
+        "step_id": 8,
+        "skill": "home",
+        "args": {
+          "arm": "right"
+        },
+        "verdict": {
+          "step_id": 8,
+          "verdict": "ALLOW",
+          "code": "OK",
+          "reason": ""
+        },
+        "attempts": 1,
+        "result": {
+          "skill": "home",
+          "arm": "right",
+          "ok": true,
+          "code": "OK",
+          "detail": "",
+          "seconds": 0.14
+        },
+        "ok": true,
+        "seconds": 0.14
+      }
+    ],
+    "replans": 2,
+    "refusals": [],
+    "score": {
+      "subgoals": {
+        "drawer_opened": true,
+        "plate_placed": true,
+        "fork_placed": true,
+        "spoon_placed": true,
+        "mug_placed": true,
+        "carton_emptied": false,
+        "water_in_cup": false
+      },
+      "completed": 5,
+      "total": 7,
+      "fraction": 0.714,
+      "success": false,
+      "setting_success": true,
+      "water": {
+        "in_mug": 0,
+        "in_bottle": 10,
+        "spilled": 0
+      }
+    },
+    "seconds": 25.73,
+    "sim_seconds": 161.6,
+    "aborted": false,
+    "handoffs": {
+      "relay": 5
+    }
+  }
+}

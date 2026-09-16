@@ -1,0 +1,71 @@
+
+Listening [assets/audio/set_the_table.wav] ...
+    ...Said
+    ...Said that
+  > Set the   [828 ms]
+    ...table for
+    ...table for
+    ...table for one
+  > table   [1453 ms]
+    ...for one
+  > for one,   [1172 ms]
+    ...please.
+    ...please.
+  > please.   [547 ms]
+
+Heard: 'Set the table for one, please.'
+  via speechmatics (live=True)
+
+Parsing intent ...
+  backend=openvino device=AUTO precision=INT4 in 16.28s
+  intent: {"place": ["plate", "fork", "spoon", "mug"], "pour": false, "open_drawer": null, "close_drawer": null, "refuse": null, "paraphrase": "set the table for one"}
+
+Plan: 16 steps
+   1. pick         {"arm": "left", "object": "plate"}
+   2. handoff      {"from_arm": "left", "to_arm": "right", "object": "plate"}
+   3. place        {"arm": "right", "object": "plate", "target": "slot_plate"}
+   4. open_drawer  {"arm": "left"}
+   5. pick         {"arm": "left", "object": "fork"}
+   6. handoff      {"from_arm": "left", "to_arm": "right", "object": "fork"}
+   7. place        {"arm": "right", "object": "fork", "target": "slot_fork"}
+   8. pick         {"arm": "left", "object": "spoon"}
+   9. handoff      {"from_arm": "left", "to_arm": "right", "object": "spoon"}
+  10. place        {"arm": "right", "object": "spoon", "target": "slot_spoon"}
+  11. pick         {"arm": "left", "object": "mug"}
+  12. handoff      {"from_arm": "left", "to_arm": "right", "object": "mug"}
+  13. place        {"arm": "right", "object": "mug", "target": "slot_mug"}
+  14. close_drawer {"arm": "left"}
+  15. home         {"arm": "left"}
+  16. home         {"arm": "right"}
+
+Running ...
+  ok   pick         plate at z=0.281
+  ok   handoff      plate changed arms via the shared zone (shared zone)
+  ok   place        plate on slot_plate (2 mm from centre)
+  ok   open_drawer  drawer at 94% open
+  ok   pick         fork at z=0.262
+  ok   handoff      fork changed arms via the shared zone (shared zone)
+  ok   place        fork on slot_fork (13 mm from centre)
+  ok   pick         spoon at z=0.262
+  ok   handoff      spoon changed arms via the shared zone (shared zone)
+  ok   place        spoon on slot_spoon (33 mm from centre)
+  ok   pick         mug at z=0.280
+  FAIL handoff      mug changed arms via the shared zone (shared zone)
+  FAIL pick         cannot descend onto mug
+  ok   pick         mug at z=0.280
+  ok   handoff      mug changed arms via the shared zone (shared zone)
+  ok   place        mug on slot_mug (1 mm from centre)
+  ok   home         
+  ok   home         
+
+Result:
+  [x] drawer_opened
+  [x] plate_placed
+  [x] fork_placed
+  [x] spoon_placed
+  [x] mug_placed
+  [ ] carton_emptied
+  [ ] water_in_cup
+  5/7 subgoals, 2 re-plans, 26s
+
+Written to results\voice_episode.json
