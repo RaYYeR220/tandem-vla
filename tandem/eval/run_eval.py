@@ -43,6 +43,9 @@ class EvalConfig:
     budget_s: float = 300.0
     speed: float = 1.0
     planner: str | None = None  #: None -> deterministic expansion; else a planner backend name
+    #: OpenVINO IR for the camera-based estimator. When set, the gate and planner read the world
+    #: from the cameras instead of from privileged simulator state.
+    perception_ir: str | None = None
 
 
 def run_eval(cfg: EvalConfig, *, out_dir: Path | None = None, verbose: bool = True) -> dict:
@@ -52,9 +55,24 @@ def run_eval(cfg: EvalConfig, *, out_dir: Path | None = None, verbose: bool = Tr
     episodes = []
     t0 = time.perf_counter()
 
+    world_fn = None
+    if cfg.perception_ir:
+        from ..perception.estimator import (
+            PerceptionEstimator,
+            arm_proprioception,
+            render_views,
+        )
+
+        estimator = PerceptionEstimator(cfg.perception_ir, device="CPU")
+
+        def world_fn():  # noqa: D401 - closure over the estimator
+            return estimator.world_state(render_views(env), arm_proprioception(env))
+
     for seed in cfg.seeds:
         world = env.reset(seed)
-        runner = EpisodeRunner(env, ex, replanner=make_replanner(env, intent))
+        runner = EpisodeRunner(
+            env, ex, replanner=make_replanner(env, intent), world_fn=world_fn
+        )
         rec = runner.run(
             canonical_plan(world, intent), instruction=cfg.instruction, budget_s=cfg.budget_s
         )
@@ -114,6 +132,7 @@ def summarize(episodes, cfg: EvalConfig) -> dict:
             "instruction": cfg.instruction,
             "dr_scale": cfg.dr_scale,
             "planner": cfg.planner or "deterministic-expansion",
+            "world_state": "camera estimate" if cfg.perception_ir else "privileged simulator",
         },
         "task_success": {
             "all_subgoals": sum(1 for e in episodes if e.score["success"]),
@@ -162,7 +181,8 @@ def to_markdown(s: dict) -> str:
         f"Instruction: **{cfg['instruction']}**  ",
         f"Seeds: `{cfg['seeds']}`  ",
         f"Domain-randomization scale: `{cfg['dr_scale']}`  ",
-        f"Planner: `{cfg['planner']}`",
+        f"Planner: `{cfg['planner']}`  ",
+        f"World state read from: **{cfg.get('world_state', 'privileged simulator')}**",
         "",
         "## Task completion",
         "",

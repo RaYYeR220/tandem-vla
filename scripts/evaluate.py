@@ -24,6 +24,14 @@ def main() -> int:
     ap.add_argument("--budget", type=float, default=260.0, help="seconds per episode")
     ap.add_argument("--speed", type=float, default=1.0, help="motion speed multiplier")
     ap.add_argument("--no-pour", action="store_true", help="place setting only")
+    ap.add_argument(
+        "--perception",
+        nargs="?",
+        const="models/perception_int8.xml",
+        default=None,
+        help="read the world from the cameras through this OpenVINO IR instead of from "
+             "privileged simulator state",
+    )
     ap.add_argument("--out", type=Path, default=Path("results/eval"))
     args = ap.parse_args()
 
@@ -42,6 +50,7 @@ def main() -> int:
         dr_scale=args.dr,
         budget_s=args.budget,
         speed=args.speed,
+        perception_ir=args.perception,
     )
     print(f"Running {len(cfg.seeds)} seeds at DR scale {cfg.dr_scale} ...")
     summary = run_eval(cfg, out_dir=args.out)

@@ -99,12 +99,18 @@ class EpisodeRunner:
         *,
         on_event=None,
         replanner=None,
+        world_fn=None,
     ):
         self.env = env
         self.ex = executor or Executor(env)
         self.on_event = on_event
         #: ``replanner(world, done_ids) -> plan`` — supplied by the planner package.
         self.replanner = replanner
+        #: Where the world state comes from. Defaults to the simulator's privileged state;
+        #: pass the camera-based estimator to close the loop through perception instead. The
+        #: gate and the planner cannot tell the difference — that is the point of the shared
+        #: schema, and it is what makes swapping them a one-line change rather than a rewrite.
+        self.world_fn = world_fn or env.world_state
 
     def emit(self, event: dict) -> None:
         if self.on_event is not None:
@@ -138,7 +144,7 @@ class EpisodeRunner:
             skill = step["skill"]
             args = dict(step.get("args", {}))
 
-            world = self.env.world_state()
+            world = self.world_fn()
             verdict = check_step(step, world, executor=self.ex)
             self.emit({"type": "verdict", "verdict": verdict})
 
@@ -186,7 +192,7 @@ class EpisodeRunner:
                 done_ids.append(sid)
             elif self.replanner is not None and replans < MAX_REPLANS:
                 replans += 1
-                new_plan = self.replanner(self.env.world_state(), done_ids)
+                new_plan = self.replanner(self.world_fn(), done_ids)
                 remaining = list(new_plan.get("steps", []))
                 self.emit({"type": "plan", "plan": new_plan, "replan": replans})
                 if remaining:
