@@ -71,6 +71,9 @@ class TandemEnv:
         self.ctrl = np.zeros(self.model.nu)
         #: Which arm is currently believed to hold which object, maintained by the executor.
         self.attached: dict[str, str | None] = {"left": None, "right": None}
+        #: Latched once the drawer has been opened. Scored on whether it ever happened, not on
+        #: the end state -- a plan that tidies up by closing it again has still opened it.
+        self.drawer_was_opened = False
 
     # ------------------------------------------------------------------ lifecycle
 
@@ -99,6 +102,7 @@ class TandemEnv:
         self.ctrl[:] = self._home_ctrl()
         d.ctrl[:] = self.ctrl
         self.attached = {"left": None, "right": None}
+        self.drawer_was_opened = False
         for _ in range(settle_steps):
             mujoco.mj_step(self.model, d)
         d.qvel[:] = 0.0
@@ -159,6 +163,8 @@ class TandemEnv:
         d.ctrl[:] = self.ctrl
         for _ in range(n * PHYSICS_SUBSTEPS):
             mujoco.mj_step(self.model, d)
+        if not self.drawer_was_opened and self.drawer_is_open():
+            self.drawer_was_opened = True
         return StepResult(
             t=float(d.time),
             contacts=int(d.ncon),
@@ -318,7 +324,7 @@ class TandemEnv:
         # cup and tip a carton over it is one capability; landing the contents inside a 37 mm
         # opening is another, and averaging them into a single flag would hide which one works.
         subgoals = {
-            "drawer_opened": bool(self.drawer_is_open()),
+            "drawer_opened": bool(self.drawer_was_opened or self.drawer_is_open()),
             **{f"{k}_placed": bool(v) for k, v in placed.items()},
             "carton_emptied": bool(water["in_bottle"] <= 4),
             "water_in_cup": bool(water["in_mug"] >= 3),

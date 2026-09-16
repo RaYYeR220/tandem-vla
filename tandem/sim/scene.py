@@ -25,9 +25,22 @@ MOUNT_YAW = {"left": 0.0, "right": 0.0}
 
 
 def build_spec() -> mujoco.MjSpec:
+    """Attach two copies of the arm to the table's mount sites.
+
+    The arm model ships its own solver settings, which differ from the cell's. MuJoCo would
+    keep the parent's and warn on every build; copying them onto the child first means the
+    parent's settings are what both were compiled with, deliberately, and the console stays
+    quiet enough that a real warning would be noticed.
+    """
     spec = mujoco.MjSpec.from_file(str(TABLE_XML))
     for arm in layout.ARMS:
         child = mujoco.MjSpec.from_file(str(ARM_XML))
+        child.option.timestep = spec.option.timestep
+        child.option.iterations = spec.option.iterations
+        child.option.ls_iterations = spec.option.ls_iterations
+        child.option.integrator = spec.option.integrator
+        child.option.cone = spec.option.cone
+        child.option.impratio = spec.option.impratio
         site = spec.site(f"mount_{arm}")
         spec.attach(child, prefix=f"{arm}/", site=site)
     return spec

@@ -30,7 +30,7 @@ except Exception:  # noqa: BLE001 - the key can equally come from the environmen
 
 from tandem.control.primitives import Executor  # noqa: E402
 from tandem.control.runner import EpisodeRunner  # noqa: E402
-from tandem.eval.tasks import canonical_plan  # noqa: E402
+from tandem.eval.tasks import canonical_plan, make_replanner  # noqa: E402
 from tandem.sim.env import TandemEnv  # noqa: E402
 from tandem.sim.randomize import RandomizationSpec  # noqa: E402
 from tandem.voice.service import VoiceService  # noqa: E402
@@ -144,9 +144,10 @@ def main() -> int:
             mark = "ok  " if ev["status"] == "done" else "FAIL"
             print(f"  {mark} {ev.get('skill', ''):<12} {ev.get('detail', '')[:64]}")
 
-    rec = EpisodeRunner(env, ex, on_event=on_event).run(
-        plan, instruction=instruction, budget_s=args.budget
-    )
+    rec = EpisodeRunner(
+        env, ex, on_event=on_event,
+        replanner=make_replanner(env, meta.get("intent")),
+    ).run(plan, instruction=instruction, budget_s=args.budget)
     score = rec.score
     print("\nResult:")
     for name, done in score["subgoals"].items():
