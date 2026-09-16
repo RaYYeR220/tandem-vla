@@ -128,31 +128,33 @@ def main() -> int:
 
     bench = sorted((ROOT / "results").glob("benchmark_*.md"))
     parts.append(
-        bench[0].read_text(encoding="utf-8").strip()
-        if bench
-        else MISSING
+        read_md(ROOT / "results/openvino_latency.md", "python scripts/export_models.py")
+        if (ROOT / "results/openvino_latency.md").exists()
+        else (bench[0].read_text(encoding="utf-8").strip() if bench else MISSING)
     )
 
     parts += [
         "",
         "---",
         "",
-        "## 4. Language planner",
+        "## 4. Quantization vs task quality",
         "",
-        "> `python tandem/planner/benchmark.py --device CPU --both`",
+        read_md(ROOT / "results/openvino_accuracy.md", "python scripts/export_models.py"),
+        "",
+        "---",
+        "",
+        "## 5. Language planner",
         "",
         read_md(
-            ROOT / "results/planner/planner_scorecard.md",
+            ROOT / "results/planner_scorecard.md",
             "python tandem/planner/benchmark.py --device CPU --both",
         ),
         "",
         "---",
         "",
-        "## 5. Perception and distilled policy",
+        "## 6. Distilled policy vs the scripted expert",
         "",
-        "> `python scripts/eval_policy.py`",
-        "",
-        read_md(ROOT / "results/policy/policy_scorecard.md", "python scripts/eval_policy.py"),
+        read_md(ROOT / "results/policy_scorecard.md", "python scripts/eval_policy.py"),
         "",
         "---",
         "",
@@ -165,7 +167,68 @@ def main() -> int:
 
     args.out.write_text("\n".join(parts) + "\n", encoding="utf-8")
     print(f"Wrote {args.out.relative_to(ROOT)}")
+    if update_readme():
+        print("Wrote README.md results block")
     return 0
+
+
+def update_readme() -> bool:
+    """Fill the README's results block from the same files, so it cannot drift from PROOF.md."""
+    readme = ROOT / "README.md"
+    if not readme.exists():
+        return False
+    text = readme.read_text(encoding="utf-8")
+    start, end = "<!-- RESULTS:START -->", "<!-- RESULTS:END -->"
+    if start not in text or end not in text:
+        return False
+
+    lines: list[str] = []
+    gate = ROOT / "results/gate/gate_scorecard.json"
+    if gate.exists():
+        g = json.loads(gate.read_text(encoding="utf-8"))
+        lines.append(
+            f"**Safety gate \u2014 {g['total']['passed']}/{g['total']['total']} cases.** "
+            f"{g['refusals']['passed']}/{g['refusals']['total']} refused correctly, "
+            f"{g['rewrites']['passed']}/{g['rewrites']['total']} repaired rather than refused, "
+            f"{g['allows_negative_control']['passed']}/"
+            f"{g['allows_negative_control']['total']} legitimate steps allowed through \u2014 the "
+            f"negative control, without which the refusal score would mean nothing."
+        )
+    task = ROOT / "results/eval/scorecard.json"
+    if task.exists():
+        t = json.loads(task.read_text(encoding="utf-8"))
+        n = t["config"]["n"]
+        lines += [
+            "",
+            f"**Task \u2014 {n} randomized seeds, mean subgoal fraction "
+            f"{t['subgoal_fraction']['mean']:.2f}.**",
+            "",
+            "| subgoal | rate |",
+            "| --- | --- |",
+        ]
+        for k, v in t["subgoals"].items():
+            lines.append(f"| {k} | {v['count']}/{n} ({v['rate']:.0%}) |")
+        lines += [
+            "",
+            f"Hand-offs performed: `{t['handoff_modes']}`. Gate refusals raised during "
+            f"execution: {t['gate_refusals']}. Re-plans: {t['replans']}.",
+        ]
+    if (ROOT / "results/openvino_accuracy.json").exists():
+        lines += [
+            "",
+            "**Quantization.** Perception and the distilled policy are exported to OpenVINO IR "
+            "in FP32, FP16 and NNCF INT8, with the accuracy cost of each measured on held-out "
+            "seeds rather than assumed \u2014 see `PROOF.md` section 4.",
+        ]
+    if not lines:
+        lines = ["_No results generated on this machine yet._"]
+
+    head = text.split(start)[0]
+    tail = text.split(end)[1]
+    readme.write_text(
+        head + start + "\n" + "\n".join(lines) + "\n" + end + tail, encoding="utf-8"
+    )
+    return True
 
 
 if __name__ == "__main__":

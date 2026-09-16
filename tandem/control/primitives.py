@@ -540,10 +540,34 @@ class Executor:
             {"object": obj, "mode": "direct", "from": from_arm, "to": to_arm},
         )
 
+    def _free_handoff_xy(self, obj: str) -> np.ndarray:
+        """A clear spot in the shared zone.
+
+        Several objects cross the table through the same place during one episode, and a
+        previous transfer that was left behind — or a placement that missed — turns the next
+        hand-off into a collision. Nudge along the zone until the ground is clear.
+        """
+        env = self.env
+        base = np.array(layout.HANDOFF_XY, dtype=float)
+        others = [p for p in layout.PROPS if p != obj]
+        for dx in (0.0, 0.055, -0.055, 0.095, -0.095):
+            cand = base + np.array([dx, 0.0])
+            if not layout.in_reach("left", cand) or not layout.in_reach("right", cand):
+                continue
+            clear = all(
+                float(np.linalg.norm(env.object_pos(o)[:2] - cand))
+                > layout.PROP_RADIUS[o] + layout.PROP_RADIUS[obj] + 0.018
+                or env.object_pos(o)[2] > layout.REST_Z[o] + 0.05
+                for o in others
+            )
+            if clear:
+                return cand
+        return base
+
     def _relay_handoff(self, from_arm, to_arm, obj, t0, stage) -> SkillResult:
         """Fallback: set the object down in the shared zone and let the other arm collect it."""
         env = self.env
-        drop = np.array([layout.HANDOFF_XY[0], layout.HANDOFF_XY[1], layout.REST_Z[obj] + 0.008])
+        drop = np.array([*self._free_handoff_xy(obj), layout.REST_Z[obj] + 0.008])
         _, jaw_yaw = grasp_geometry(env, obj)
         self.retract(from_arm, 0.7)
         pose = self.go(from_arm, drop + np.array([0, 0, APPROACH_CLEARANCE]), jaw_yaw,

@@ -40,7 +40,7 @@ class EvalConfig:
     instruction: str = "set the table for one and pour me some water"
     intent: dict | None = None
     dr_scale: float = 1.0
-    budget_s: float = 260.0
+    budget_s: float = 300.0
     speed: float = 1.0
     planner: str | None = None  #: None -> deterministic expansion; else a planner backend name
 

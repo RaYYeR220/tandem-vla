@@ -182,6 +182,30 @@ web/               landing page and live dashboard
 scripts/           every command a reviewer needs
 ```
 
+## Results
+
+<!-- RESULTS:START -->
+**Safety gate — 24/24 cases.** 12/12 refused correctly, 4/4 repaired rather than refused, 8/8 legitimate steps allowed through — the negative control, without which the refusal score would mean nothing.
+
+**Task — 16 randomized seeds, mean subgoal fraction 0.64.**
+
+| subgoal | rate |
+| --- | --- |
+| drawer_opened | 16/16 (100%) |
+| plate_placed | 8/16 (50%) |
+| fork_placed | 14/16 (88%) |
+| spoon_placed | 15/16 (94%) |
+| mug_placed | 9/16 (56%) |
+| carton_emptied | 10/16 (62%) |
+| water_in_cup | 0/16 (0%) |
+
+Hand-offs performed: `{'relay': 66}`. Gate refusals raised during execution: 111. Re-plans: 48.
+
+**Quantization.** Perception and the distilled policy are exported to OpenVINO IR in FP32, FP16 and NNCF INT8, with the accuracy cost of each measured on held-out seeds rather than assumed — see `PROOF.md` section 4.
+<!-- RESULTS:END -->
+
+Full tables, with the failure modes and the per-skill breakdown, in [`PROOF.md`](PROOF.md).
+
 ## Honest limits
 
 Collected in one place rather than scattered: see [`MOCKS.md`](MOCKS.md) for the exact line

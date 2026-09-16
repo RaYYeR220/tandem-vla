@@ -21,8 +21,11 @@ from .primitives import Executor, SkillResult
 #: that missed has already opened the gripper, so running it again just reports an empty hand;
 #: those failures go to the re-planner, which can see what actually happened.
 RETRYABLE = {"pick", "open_drawer", "close_drawer", "home", "hold"}
-MAX_STEP_ATTEMPTS = 2
-MAX_REPLANS = 4
+MAX_STEP_ATTEMPTS = 3
+#: Generous, because re-planning is cheap and state-derived: a fresh plan starts from wherever
+#: the scene actually is, so grinding through a bad grasp costs one more attempt rather than
+#: derailing the episode. The wall-clock budget is the real stop condition.
+MAX_REPLANS = 12
 
 
 @dataclass
