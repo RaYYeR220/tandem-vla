@@ -23,10 +23,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+NL = chr(10)
+
 MISSING = (
     "_Not generated on this machine. Run the command above and re-run "
     "`python scripts/make_proof.py`._"
 )
+
+
+def _excerpt(path: Path, head: int = 18, tail: int = 14) -> str:
+    """First and last lines of a captured run, so the middle can be long without hiding."""
+    if not path.exists():
+        return "(not captured on this machine)"
+    lines = [ln.rstrip() for ln in path.read_text(encoding="utf-8").splitlines()]
+    lines = [ln for ln in lines if ln.strip()]
+    if len(lines) <= head + tail:
+        return NL.join(lines)
+    skipped = len(lines) - head - tail
+    return NL.join(lines[:head] + [f"    ... {skipped} lines ..."] + lines[-tail:])
 
 
 def read_md(path: Path, command: str) -> str:
@@ -98,6 +112,21 @@ def main() -> int:
         "run; on a Core Ultra it will enumerate CPU, GPU and NPU with no changes. Treat the "
         "latency table as evidence that the pipeline is genuinely quantized and genuinely "
         "running through OpenVINO, not as an Intel benchmark.",
+        "",
+        "---",
+        "",
+        "## 0. One command, end to end",
+        "",
+        "> `python scripts/voice_to_table.py --audio assets/audio/set_the_table.wav --seed 1`",
+        "",
+        "Live speech through Speechmatics, intent parsed locally by a 1.5B model in OpenVINO "
+        "INT4, plan expanded against the scene, every step gated, both arms executing. The "
+        "captured run below is `results/voice_episode_log.txt` verbatim; the full record, "
+        "including every step result, is in `results/voice_episode.json`.",
+        "",
+        "```",
+        _excerpt(ROOT / "results/voice_episode_log.txt"),
+        "```",
         "",
         "---",
         "",
