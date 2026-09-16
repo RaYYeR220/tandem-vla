@@ -33,11 +33,19 @@ DEFAULT_ORDER = ("plate", "fork", "spoon", "mug")
 
 
 def _fetch(obj: str, world: dict, step_id: int) -> list[dict]:
-    """Steps that move one object from wherever it is onto its slot."""
+    """Steps that move one object from wherever it is onto its slot.
+
+    Written to be re-entrant: this is what the runner calls again after a failure, so it has to
+    start from wherever the object actually is now -- on its slot already, in a gripper, or on
+    the table. Emitting a `pick` for something the arm is already holding is the single most
+    common way a re-plan turns one failed step into five.
+    """
     info = world["objects"][obj]
     slot = layout.OBJECT_SLOT[obj]
-    if info["on_slot"] == slot:
+    if info["on_slot"] == slot and info["held_by"] is None:
         return []
+    if info["held_by"] is not None:
+        return _fetch_from_hand(obj, info["held_by"], world, step_id)
     src_arm = (info["reachable_by"] or ["left"])[0]
     dst_arm = (world["slots"][slot]["reachable_by"] or ["right"])[0]
     steps = [
@@ -66,8 +74,26 @@ def canonical_plan(world: dict, intent: dict | None = None) -> dict:
     steps: list[dict] = []
     nid = 1
 
+    # Anything held that this plan has no further use for is put down first, so the drawer and
+    # the next pick are not blocked by a gripper that is still full from a failed step.
+    for arm_name, arm_info in world["arms"].items():
+        held = arm_info["holding"]
+        if held and held not in wanted and not (pour and held in ("mug", "bottle")):
+            steps.append({"id": nid, "skill": "place",
+                          "args": {"arm": arm_name, "object": held, "target": "staging"},
+                          "rationale": f"the {arm_name} arm still has the {held} from an "
+                                       f"interrupted step"})
+            nid += 1
+
     if any(world["objects"][o]["in_drawer"] for o in wanted) and not world["drawer"]["is_open"]:
         drawer_arm = (world["drawer"]["reachable_by"] or ["left"])[0]
+        if world["arms"][drawer_arm]["holding"]:
+            steps.append({"id": nid, "skill": "place",
+                          "args": {"arm": drawer_arm,
+                                   "object": world["arms"][drawer_arm]["holding"],
+                                   "target": "staging"},
+                          "rationale": "the handle needs a free hand"})
+            nid += 1
         steps.append({"id": nid, "skill": "open_drawer", "args": {"arm": drawer_arm},
                       "rationale": "the cutlery is inside it"})
         nid += 1

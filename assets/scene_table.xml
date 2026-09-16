@@ -3,7 +3,7 @@
   <option integrator="implicitfast" timestep="0.002" cone="elliptic" iterations="20" ls_iterations="30" impratio="10"/>
 
   <visual>
-    <global offwidth="1280" offheight="960"/>
+    <global offwidth="1920" offheight="1200"/>
     <headlight ambient="0.35 0.35 0.35" diffuse="0.5 0.5 0.5" specular="0.1 0.1 0.1"/>
     <map znear="0.01" zfar="12"/>
     <quality shadowsize="4096"/>
@@ -42,11 +42,14 @@
     <light name="rim" pos="0.75 0.70 0.90" dir="-0.6 -0.5 -1" directional="false" diffuse="0.30 0.32 0.35"
       specular="0.05 0.05 0.05" cutoff="70"/>
 
-    <!-- Backdrop: recolored during domain randomization -->
-    <body name="backdrop" pos="0 0.80 0.35">
-      <geom name="backdrop_geom" type="box" size="1.10 0.01 0.55" rgba="0.30 0.33 0.38 1" contype="0"
-        conaffinity="0" group="1"/>
+    <!-- Room shell: recolored during domain randomization so the background is part of the
+         visual variation rather than a constant the perception net can memorise. -->
+    <body name="backdrop" pos="0 1.30 0.80">
+      <geom name="backdrop_geom" type="box" size="4.00 0.01 2.20" rgba="0.30 0.33 0.38 1"
+        contype="0" conaffinity="0" group="1"/>
     </body>
+    <geom name="floor" type="plane" pos="0 0.1 -0.72" size="3 3 0.1" rgba="0.17 0.18 0.21 1"
+      contype="0" conaffinity="0" group="1"/>
 
     <!-- Table: top surface is the z = 0 plane -->
     <body name="table" pos="0 0.12 -0.03">
@@ -179,26 +182,26 @@
     <body name="setting_marks" pos="0 0 0">
       <geom name="slot_plate_mark" type="cylinder" size="0.036 0.0008" pos="0.27 0.14 0.0009"
         material="slotmat" contype="0" conaffinity="0" group="1"/>
-      <geom name="slot_fork_mark" type="box" size="0.012 0.052 0.0008" pos="0.195 0.14 0.0009"
+      <geom name="slot_fork_mark" type="box" size="0.012 0.052 0.0008" pos="0.160 0.14 0.0009"
         material="slotmat" contype="0" conaffinity="0" group="1"/>
-      <geom name="slot_spoon_mark" type="box" size="0.012 0.052 0.0008" pos="0.345 0.14 0.0009"
+      <geom name="slot_spoon_mark" type="box" size="0.012 0.052 0.0008" pos="0.375 0.14 0.0009"
         material="slotmat" contype="0" conaffinity="0" group="1"/>
-      <geom name="slot_mug_mark" type="cylinder" size="0.030 0.0008" pos="0.295 0.198 0.0009"
+      <geom name="slot_mug_mark" type="cylinder" size="0.030 0.0008" pos="0.285 0.210 0.0009"
         material="slotmat" contype="0" conaffinity="0" group="1"/>
       <geom name="handoff_mark" type="cylinder" size="0.045 0.0008" pos="0.0 0.10 0.0009" material="zonemat"
         contype="0" conaffinity="0" group="1"/>
     </body>
 
     <site name="slot_plate" pos="0.27 0.14 0.006" size="0.004" rgba="0 0 1 0"/>
-    <site name="slot_fork" pos="0.195 0.14 0.006" size="0.004" rgba="0 0 1 0"/>
-    <site name="slot_spoon" pos="0.345 0.14 0.006" size="0.004" rgba="0 0 1 0"/>
-    <site name="slot_mug" pos="0.295 0.198 0.032" size="0.004" rgba="0 0 1 0"/>
+    <site name="slot_fork" pos="0.160 0.14 0.006" size="0.004" rgba="0 0 1 0"/>
+    <site name="slot_spoon" pos="0.375 0.14 0.006" size="0.004" rgba="0 0 1 0"/>
+    <site name="slot_mug" pos="0.285 0.210 0.032" size="0.004" rgba="0 0 1 0"/>
     <site name="handoff_zone" pos="0.0 0.10 0.115" size="0.004" rgba="1 0.6 0 0"/>
 
     <!-- ================= Cameras ================= -->
     <camera name="overhead" mode="fixed" pos="0.0 0.13 0.78" euler="0 0 0" fovy="58"/>
-    <camera name="front" mode="fixed" pos="0.0 -0.62 0.46" euler="0.95 0 0" fovy="52"/>
-    <camera name="cinematic" mode="fixed" pos="-0.52 -0.52 0.50" euler="0.92 0 -0.72" fovy="55"/>
+    <camera name="front" mode="targetbody" target="table" pos="0.0 -0.66 0.42" fovy="46"/>
+    <camera name="cinematic" mode="targetbody" target="table" pos="-0.74 -0.62 0.58" fovy="46"/>
   </worldbody>
 
 </mujoco>

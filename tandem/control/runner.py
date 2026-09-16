@@ -22,7 +22,7 @@ from .primitives import Executor, SkillResult
 #: those failures go to the re-planner, which can see what actually happened.
 RETRYABLE = {"pick", "open_drawer", "close_drawer", "home", "hold"}
 MAX_STEP_ATTEMPTS = 2
-MAX_REPLANS = 3
+MAX_REPLANS = 4
 
 
 @dataclass

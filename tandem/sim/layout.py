@@ -28,12 +28,13 @@ R_MAX = 0.280
 #: Nothing behind the shoulder line.
 Y_MIN = -0.055
 
-#: Place setting — right-arm territory.
+#: Place setting — right-arm territory. Spaced so a 110 mm piece of cutlery lying on its slot
+#: does not overlap the plate: they did, and laying the fork used to knock the plate off.
 SLOTS = {
     "slot_plate": np.array([0.27, 0.14, 0.006]),
-    "slot_fork": np.array([0.195, 0.14, 0.006]),
-    "slot_spoon": np.array([0.345, 0.14, 0.006]),
-    "slot_mug": np.array([0.295, 0.198, 0.032]),
+    "slot_fork": np.array([0.160, 0.14, 0.006]),
+    "slot_spoon": np.array([0.375, 0.14, 0.006]),
+    "slot_mug": np.array([0.285, 0.210, 0.032]),
 }
 
 #: Which object each slot is meant to receive (used by the task success check).
