@@ -54,6 +54,8 @@ Every public statement this project makes, tagged by the evidence behind it. The
 | The system never fabricates a transcript | **REPRODUCIBLE** | with no key, `ScriptedTranscriber` reports `{"backend": "scripted", "live": false}` and the UI is labelled REPLAY |
 | Reported transcription latency is a lab-grade measurement | **NOT-CLAIMED** | It is an approximation from chunk-send time to final arrival, documented as such in `tandem/voice/speechmatics_rt.py`. It slightly overstates true latency and cannot see network buffering. |
 
+| Nothing in the system touches the network | **NOT-CLAIMED** | Transcription is a call to Speechmatics' realtime API. It happens before the control loop and is the only network call, but it is a network call, and the README says so. Language, perception and the policy do run locally through OpenVINO. |
+
 ## Things we are explicitly not claiming
 
 - **That the arms hand objects to each other in mid-air.** They do not, by default. See `MOCKS.md`.

@@ -11,8 +11,10 @@ measured state of the scene and either allows it, repairs it, or refuses it with
 the arms do it — handing objects to each other, because neither arm can reach both the props
 and the place setting.
 
-Every neural model in the loop — speech, language, perception, policy — runs locally through
-**OpenVINO**. Nothing in the control path touches the network.
+Language, perception and the visuomotor policy all run locally through **OpenVINO**. Speech is the
+one exception and the one network call: transcription goes to Speechmatics' realtime API, and it
+happens before the control loop starts, not inside it. Once an instruction has been heard, nothing
+between the intent and the actuators touches the network.
 
 ```
    speech  ──▶  intent  ──▶  plan  ──▶  ┌──────────┐  ──▶  skills  ──▶  two SO-101 arms

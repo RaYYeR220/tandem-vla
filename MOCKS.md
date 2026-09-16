@@ -32,6 +32,11 @@ One page, no hedging. If something in this project is not what it looks like, it
 | Shared-zone relay instead of an in-air hand-off | Always, unless `TANDEM_HANDOFF=direct` | The step result carries `"mode": "relay"`, and the scorecard reports hand-off modes separately. See *Honest limits* below. |
 | Scripted expert instead of the distilled policy | The default execution path | The policy is evaluated head-to-head against the expert in `PROOF.md`; whichever one ran is named in the results. |
 
+**Speech is a cloud call.** Everything else neural runs on the machine through OpenVINO, but
+transcription goes to Speechmatics. It happens before the control loop and nothing between the
+parsed intent and the actuators leaves the box — but "fully on-device" would be false and we do
+not say it.
+
 ## Honest limits
 
 **The hand-off is a relay, not an in-air exchange.** The props start in the left arm's territory
