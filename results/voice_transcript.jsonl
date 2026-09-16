@@ -1,0 +1,38 @@
+{"service": {"backend": "speechmatics", "live": true, "model": "enhanced", "language": "en", "has_api_key": true, "url": "wss://eu2.rt.speechmatics.com/v2"}}
+{"type": "partial", "text": "Said", "t": 1.281, "clip": "set_the_table.wav", "t_rel": 1.275}
+{"type": "partial", "text": "Said that", "t": 1.687, "clip": "set_the_table.wav", "t_rel": 1.687}
+{"type": "final", "text": "Set the ", "t": 2.078, "latency_ms": 859.0000000112923, "clip": "set_the_table.wav", "t_rel": 2.081}
+{"type": "partial", "text": "table for", "t": 2.078, "clip": "set_the_table.wav", "t_rel": 2.081}
+{"type": "partial", "text": "table for", "t": 2.484, "clip": "set_the_table.wav", "t_rel": 2.478}
+{"type": "partial", "text": "table for one", "t": 2.891, "clip": "set_the_table.wav", "t_rel": 2.895}
+{"type": "final", "text": "table ", "t": 3.203, "latency_ms": 1609.0000000112923, "clip": "set_the_table.wav", "t_rel": 3.209}
+{"type": "partial", "text": "for one", "t": 3.203, "clip": "set_the_table.wav", "t_rel": 3.209}
+{"type": "final", "text": "for one, ", "t": 3.656, "latency_ms": 1250.0, "clip": "set_the_table.wav", "t_rel": 3.651}
+{"type": "partial", "text": "please.", "t": 3.656, "clip": "set_the_table.wav", "t_rel": 3.651}
+{"type": "partial", "text": "please.", "t": 4.062, "clip": "set_the_table.wav", "t_rel": 4.064}
+{"type": "final", "text": "please. ", "t": 4.406, "latency_ms": 500.0, "clip": "set_the_table.wav", "t_rel": 4.4}
+{"type": "partial", "text": "Power", "t": 1.328, "clip": "pour_water.wav", "t_rel": 1.325}
+{"type": "partial", "text": "Power", "t": 1.688, "clip": "pour_water.wav", "t_rel": 1.69}
+{"type": "final", "text": "Power ", "t": 2.141, "latency_ms": 1047.0000000059372, "clip": "pour_water.wav", "t_rel": 2.133}
+{"type": "partial", "text": "me", "t": 2.141, "clip": "pour_water.wav", "t_rel": 2.133}
+{"type": "final", "text": "me some ", "t": 2.5, "latency_ms": 968.9999999973224, "clip": "pour_water.wav", "t_rel": 2.497}
+{"type": "partial", "text": "water", "t": 2.5, "clip": "pour_water.wav", "t_rel": 2.497}
+{"type": "partial", "text": "water.", "t": 2.875, "clip": "pour_water.wav", "t_rel": 2.879}
+{"type": "final", "text": "water. ", "t": 3.188, "latency_ms": 375.0, "clip": "pour_water.wav", "t_rel": 3.193}
+{"type": "partial", "text": "Stop", "t": 1.718, "clip": "stop_command.wav", "t_rel": 1.729}
+{"type": "final", "text": "Stop ", "t": 2.187, "latency_ms": 922.0000000059372, "stop": true, "clip": "stop_command.wav", "t_rel": 2.187}
+{"type": "barge_in", "text": "Stop ", "t": 2.187, "stop": true, "clip": "stop_command.wav", "t_rel": 2.187}
+{"type": "partial", "text": ".", "t": 2.547, "clip": "stop_command.wav", "t_rel": 2.553}
+{"type": "partial", "text": ". put", "t": 2.922, "clip": "stop_command.wav", "t_rel": 2.926}
+{"type": "partial", "text": ". put the", "t": 3.25, "clip": "stop_command.wav", "t_rel": 3.254}
+{"type": "final", "text": ". Put the ", "t": 3.593, "latency_ms": 812.0000000053551, "clip": "stop_command.wav", "t_rel": 3.59}
+{"type": "barge_in", "text": ". Put the ", "t": 3.593, "clip": "stop_command.wav", "t_rel": 3.591}
+{"type": "partial", "text": "Plaza de", "t": 3.593, "clip": "stop_command.wav", "t_rel": 3.591}
+{"type": "partial", "text": "platter", "t": 4.031, "clip": "stop_command.wav", "t_rel": 4.032}
+{"type": "final", "text": "plate ", "t": 4.343, "latency_ms": 1125.0, "clip": "stop_command.wav", "t_rel": 4.356}
+{"type": "barge_in", "text": "plate ", "t": 4.343, "clip": "stop_command.wav", "t_rel": 4.356}
+{"type": "partial", "text": "down", "t": 4.343, "clip": "stop_command.wav", "t_rel": 4.356}
+{"type": "partial", "text": "down first", "t": 4.734, "clip": "stop_command.wav", "t_rel": 4.738}
+{"type": "partial", "text": "down first", "t": 5.093, "clip": "stop_command.wav", "t_rel": 5.091}
+{"type": "final", "text": "down first. ", "t": 5.328, "latency_ms": 468.99999999732245, "clip": "stop_command.wav", "t_rel": 5.338}
+{"type": "barge_in", "text": "down first. ", "t": 5.328, "clip": "stop_command.wav", "t_rel": 5.338}

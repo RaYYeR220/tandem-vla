@@ -48,7 +48,8 @@ Every public statement this project makes, tagged by the evidence behind it. The
 
 | Claim | Tier | Evidence |
 | --- | --- | --- |
-| Realtime transcription uses the current Speechmatics SDK against the live endpoint | **VERIFIED-LIVE** | `speechmatics-rt` 1.1.1, verified against `wss://eu2.rt.speechmatics.com/v2`; the authentication-failure path was exercised end-to-end and produces one clean error event |
+| Realtime transcription uses the current Speechmatics SDK against the live endpoint | **VERIFIED-LIVE** | `speechmatics-rt` 1.1.1 against `wss://eu2.rt.speechmatics.com/v2`. Full captured session in `results/voice_transcript.jsonl` and `PROOF.md` section 6: 22 partials, 11 finals, median final latency 922 ms. The authentication-failure path was exercised separately and produces one clean error event. |
+| Barge-in fires on live speech, not just in tests | **VERIFIED-LIVE** | four `barge_in` events in the captured session, the first flagged `stop` from the stop vocabulary |
 | Barge-in halts execution and triggers a re-plan | **REPRODUCIBLE** | `tandem/voice/test_voice.py`, 8 passing tests |
 | The system never fabricates a transcript | **REPRODUCIBLE** | with no key, `ScriptedTranscriber` reports `{"backend": "scripted", "live": false}` and the UI is labelled REPLAY |
 | Reported transcription latency is a lab-grade measurement | **NOT-CLAIMED** | It is an approximation from chunk-send time to final arrival, documented as such in `tandem/voice/speechmatics_rt.py`. It slightly overstates true latency and cannot see network buffering. |
