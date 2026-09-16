@@ -158,6 +158,7 @@ def skill_trials(env: TandemEnv, scripted: Executor, learned: PolicyExecutor,
     for seed in seeds:
         env.reset(seed)
         base = capture(env, scripted)
+        started = time.perf_counter()
         for obj in PICK_OBJECTS:
             table = per_object.setdefault(obj, {"oracle": Tally(), "policy": Tally()})
             key = (seed, obj)
@@ -202,6 +203,16 @@ def skill_trials(env: TandemEnv, scripted: Executor, learned: PolicyExecutor,
             tallies[("oracle", "place")].add(cache[place_key])
             restore(env, learned, staged)
             tallies[("policy", "place")].add(learned.place("right", obj, slot))
+        print(
+            f"    seed {seed}: oracle pick {tallies[('oracle', 'pick')].successes}/"
+            f"{tallies[('oracle', 'pick')].attempts}, policy pick "
+            f"{tallies[('policy', 'pick')].successes}/{tallies[('policy', 'pick')].attempts}, "
+            f"place {tallies[('oracle', 'place')].successes}/"
+            f"{tallies[('oracle', 'place')].attempts} vs "
+            f"{tallies[('policy', 'place')].successes}/{tallies[('policy', 'place')].attempts} "
+            f"({time.perf_counter() - started:.0f}s)",
+            flush=True,
+        )
 
     return {
         "matched": {
@@ -234,6 +245,8 @@ def episode_trials(env: TandemEnv, executor: Executor, seeds: list[int], *,
         record = runner.run(canonical_plan(world, INTENT),
                             instruction="set the table for one", budget_s=budget)
         seconds.append(time.perf_counter() - t0)
+        print(f"    seed {seed}: {record.score.get('completed')}/"
+              f"{record.score.get('total')} subgoals ({seconds[-1]:.0f}s)", flush=True)
         score = record.score
         completed.append(int(score.get("completed", 0)))
         for name, value in score.get("subgoals", {}).items():

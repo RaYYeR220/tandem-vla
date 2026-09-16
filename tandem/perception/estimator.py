@@ -16,8 +16,8 @@ Two inputs are deliberately *not* treated as privileged:
 
 One field genuinely cannot be estimated from these two cameras: the water count. The
 particles live inside an opaque carton and, once poured, inside a mug seen from above.
-The returned dict therefore carries zeros with ``observed: False`` unless a caller passes
-a measurement in, and never pretends otherwise.
+The returned dict therefore carries zeros unless a caller passes a measurement in, and
+says so under ``["perception"]["water_observed"]`` rather than pretending otherwise.
 """
 
 from __future__ import annotations
@@ -139,7 +139,7 @@ class PerceptionEstimator:
 
     # ------------------------------------------------------------------ world state
 
-    def estimate(
+    def world_state(
         self,
         views: Mapping[str, np.ndarray],
         arms: Mapping[str, Mapping[str, Any]],
@@ -148,15 +148,27 @@ class PerceptionEstimator:
         seed: int | None = None,
         water: Mapping[str, int] | None = None,
     ) -> dict:
-        """Produce a dict matching ``TandemEnv.world_state()`` exactly.
+        """Two camera frames in, a `TandemEnv.world_state()`-shaped dict out.
 
-        ``arms`` maps each arm name to ``{"qpos": [5 floats], "gripper": float,
-        "tcp": [x, y, z]}`` -- proprioception, not scene knowledge.
+        Deliberately named after the method it replaces and taking the same kind of input
+        a real cell would have: pixels plus the arms' own encoders. ``arms`` maps each arm
+        to ``{"qpos": [5 floats], "gripper": float, "tcp": [x, y, z]}``.
+
+        The returned dict has exactly the top-level keys of ``world_state()`` plus one --
+        ``"perception"`` -- carrying the diagnostics that have no counterpart in privileged
+        state: per-object visibility probability, inference latency, the device, and
+        whether the water count was measured or left at zero. Everything the planner and
+        the gate read is in the same place with the same name, so they cannot tell the
+        difference.
         """
-        decoded = self.decode(self.infer(views))
-        return self.world_state(decoded, arms, t=t, seed=seed, water=water)
+        return self.assemble(
+            self.decode(self.infer(views)), arms, t=t, seed=seed, water=water
+        )
 
-    def world_state(
+    #: Historical name for the same call.
+    estimate = world_state
+
+    def assemble(
         self,
         decoded: Mapping[str, np.ndarray],
         arms: Mapping[str, Mapping[str, Any]],
@@ -165,6 +177,7 @@ class PerceptionEstimator:
         seed: int | None = None,
         water: Mapping[str, int] | None = None,
     ) -> dict:
+        """Build the world state from an already-decoded network output."""
         positions = {name: np.asarray(decoded["pos"][i], dtype=float)
                      for i, name in enumerate(PROPS)}
         yaws = {name: float(decoded["yaw"][i]) for i, name in enumerate(PROPS)}
@@ -182,7 +195,6 @@ class PerceptionEstimator:
                 "on_slot": on_slot_for(name, pos),
                 "in_drawer": in_drawer_for(pos, open_frac),
                 "reachable_by": layout.reaching_arms(pos),
-                "visible": round(visibility[name], 3),
             }
 
         slots = {}
@@ -206,9 +218,11 @@ class PerceptionEstimator:
                 "busy": bool(source.get("busy", False)),
             }
 
-        water_out = {"in_mug": 0, "in_bottle": 0, "spilled": 0, "observed": False}
-        if water is not None:
-            water_out = {**{k: int(v) for k, v in water.items()}, "observed": True}
+        observed = water is not None
+        water_out = (
+            {k: int(v) for k, v in water.items()} if observed
+            else {"in_mug": 0, "in_bottle": 0, "spilled": 0}
+        )
 
         return {
             "t": round(float(t), 3),
@@ -223,9 +237,13 @@ class PerceptionEstimator:
             "slots": slots,
             "arms": arm_state,
             "water": water_out,
-            "source": "perception",
-            "infer_ms": round(self.last_latency_ms, 3),
-            "device": self.device,
+            "perception": {
+                "source": "perception",
+                "device": self.device,
+                "infer_ms": round(self.last_latency_ms, 3),
+                "visible": {name: round(visibility[name], 3) for name in PROPS},
+                "water_observed": observed,
+            },
         }
 
     # ------------------------------------------------------------------ derivations
@@ -276,7 +294,81 @@ def arm_proprioception(env) -> dict[str, dict[str, Any]]:
 
 def render_views(env, *, size: int = IMAGE_SIZE) -> dict[str, np.ndarray]:
     """Grab the two camera frames the estimator expects."""
-    return {cam: env.render(cam, size, size) for cam in CAMERAS}
+    return {cam: env.render(cam, size, size).copy() for cam in CAMERAS}
+
+
+def agreement_against_truth(env, estimator: "PerceptionEstimator", seeds, *, intent=None) -> dict:
+    """Does the stack make the same decisions from cameras as from privileged state?
+
+    For each seed the cell is reset, both world states are built, and the two are pushed
+    through the planner and the gate. What comes back is how often the *plan* and the
+    *verdict sequence* are identical -- which is the claim that matters. A millimetre of
+    position error only counts if it changes a decision.
+
+    Imports are local so the runtime estimator has no import-time dependency on the
+    planning or gating packages.
+    """
+    from ..eval.tasks import canonical_plan
+    from ..gate import check_step
+
+    goal = intent or {"place": ["plate", "fork", "spoon", "mug"], "pour": True}
+    plans_equal = verdicts_equal = 0
+    steps_total = steps_equal = 0
+    mismatches: dict[str, int] = {}
+    differences: list[dict] = []
+
+    for seed in seeds:
+        truth = env.reset(int(seed))
+        estimated = estimator.world_state(
+            render_views(env), arm_proprioception(env), t=truth["t"], seed=int(seed)
+        )
+        truth_plan = canonical_plan(truth, goal)
+        estimated_plan = canonical_plan(estimated, goal)
+        truth_steps = [(s["skill"], s.get("args", {})) for s in truth_plan["steps"]]
+        estimated_steps = [(s["skill"], s.get("args", {})) for s in estimated_plan["steps"]]
+        same_plan = truth_steps == estimated_steps
+        plans_equal += int(same_plan)
+
+        # The gate is judged on one fixed plan -- the one derived from privileged state --
+        # so a verdict difference is attributable to the world state and nothing else.
+        truth_verdicts = [
+            (v["verdict"], v["code"]) for v in
+            (check_step(s, truth) for s in truth_plan["steps"])
+        ]
+        estimated_verdicts = [
+            (v["verdict"], v["code"]) for v in
+            (check_step(s, estimated) for s in truth_plan["steps"])
+        ]
+        verdicts_equal += int(truth_verdicts == estimated_verdicts)
+        steps_total += len(truth_verdicts)
+        steps_equal += sum(int(a == b) for a, b in zip(truth_verdicts, estimated_verdicts))
+        for step, a, b in zip(truth_plan["steps"], truth_verdicts, estimated_verdicts):
+            if a != b:
+                key = f"{step['skill']}: {a[0]}/{a[1]} -> {b[0]}/{b[1]}"
+                mismatches[key] = mismatches.get(key, 0) + 1
+
+        if not (same_plan and truth_verdicts == estimated_verdicts):
+            differences.append(
+                {
+                    "seed": int(seed),
+                    "plan_truth": [f"{s}{a}" for s, a in truth_steps],
+                    "plan_estimated": [f"{s}{a}" for s, a in estimated_steps],
+                    "verdicts_truth": truth_verdicts,
+                    "verdicts_estimated": estimated_verdicts,
+                }
+            )
+
+    n = max(1, len(list(seeds)))
+    return {
+        "seeds": [int(s) for s in seeds],
+        "episodes": n,
+        "plan_match": round(plans_equal / n, 4),
+        "verdict_sequence_match": round(verdicts_equal / n, 4),
+        "verdict_step_match": round(steps_equal / max(1, steps_total), 4),
+        "steps_compared": steps_total,
+        "verdict_mismatches": dict(sorted(mismatches.items(), key=lambda kv: -kv[1])),
+        "differences": differences,
+    }
 
 
 def calibration_samples(

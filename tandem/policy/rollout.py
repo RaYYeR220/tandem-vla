@@ -36,6 +36,7 @@ from ..control.poses import grasp_transform
 from .schema import (
     ACTION_DIM,
     CHUNK,
+    CHUNK_STRIDE,
     EXECUTE,
     IMAGE_SIZE,
     condition_vector,
@@ -64,12 +65,14 @@ class PolicyRunner:
         device: str = "CPU",
         execute: int = EXECUTE,
         ensemble: bool = False,
+        chunk_stride: int = CHUNK_STRIDE,
         core: ov.Core | None = None,
         performance_hint: str = "LATENCY",
     ):
         self.ir_path = Path(ir_path)
         self.device = device
         self.execute = max(1, min(execute, CHUNK))
+        self.chunk_stride = max(1, chunk_stride)
         self.ensemble = ensemble
         self._core = core or ov.Core()
         self._compiled = self._core.compile_model(
@@ -129,7 +132,7 @@ class PolicyRunner:
         horizon = ticks if ticks is not None else HORIZON.get(skill, DEFAULT_HORIZON)
 
         pending: deque[tuple[int, np.ndarray]] = deque(maxlen=CHUNK)
-        step = self.execute if not self.ensemble else 1
+        step = self.execute * self.chunk_stride if not self.ensemble else self.chunk_stride
         inferences = 0
         for tick in range(horizon):
             if tick % step == 0:
@@ -141,7 +144,11 @@ class PolicyRunner:
                 )
                 pending.append((tick, chunk))
                 inferences += 1
-            action = _blend(pending, tick) if self.ensemble else pending[-1][1][tick - pending[-1][0]]
+            action = (
+                _blend(pending, tick, self.chunk_stride)
+                if self.ensemble
+                else _sample(pending[-1][1], tick - pending[-1][0], self.chunk_stride)
+            )
             command = denormalize_joints(action, limits)
             if apply == "both":
                 env.ctrl[:] = command
@@ -171,15 +178,25 @@ def _proprio(env: TandemEnv, limits: np.ndarray) -> np.ndarray:
     return normalize_joints(raw, limits)
 
 
-def _blend(pending: deque[tuple[int, np.ndarray]], tick: int) -> np.ndarray:
+def _sample(chunk: np.ndarray, offset: int, stride: int) -> np.ndarray:
+    """Read a chunk at a control tick, interpolating between its strided entries."""
+    position = offset / stride
+    index = int(position)
+    frac = position - index
+    lo = chunk[min(index, CHUNK - 1)]
+    hi = chunk[min(index + 1, CHUNK - 1)]
+    return lo * (1.0 - frac) + hi * frac
+
+
+def _blend(pending: deque[tuple[int, np.ndarray]], tick: int, stride: int) -> np.ndarray:
     """Temporal ensembling: exponentially weighted mean of every chunk covering ``tick``."""
     total = np.zeros(ACTION_DIM, dtype=np.float32)
     weight_sum = 0.0
     for start, chunk in pending:
         offset = tick - start
-        if 0 <= offset < CHUNK:
-            weight = float(np.exp(-ENSEMBLE_DECAY * offset))
-            total += weight * chunk[offset]
+        if 0 <= offset < CHUNK * stride:
+            weight = float(np.exp(-ENSEMBLE_DECAY * offset / stride))
+            total += weight * _sample(chunk, offset, stride)
             weight_sum += weight
     return total / max(weight_sum, 1e-6)
 

@@ -104,6 +104,55 @@ def load(directory: str | Path, *, limit: int | None = None) -> PolicyData:
     return data
 
 
+def restride_chunks(data: PolicyData, stride: int) -> PolicyData:
+    """Stretch each action chunk over ``stride`` times as much wall time.
+
+    The chunk as recorded is 16 *consecutive* 50 Hz commands -- 0.32 s of motion. Over that
+    window a servo target barely moves, so an L1 loss on it is minimised by a policy that
+    copies its own proprioception and commits to nothing. That failure mode is not visible
+    in the loss (validation L1 reaches 0.007 normalized, under a degree) but it is fatal in
+    closed loop: measured on held-out seeds, such a policy swept 0.07-0.38 rad per joint
+    against the teacher's 0.56-1.14 and never reached the object.
+
+    Rebuilding the chunk with a time stride fixes the horizon without touching the
+    recording: observations were stored every ``stride`` control ticks, so taking the first
+    action of each of the next 16 samples in the same step yields 16 targets spanning
+    ``16 * stride`` ticks -- 0.96 s at stride 3. Samples are grouped by (shard, consecutive
+    row, seed, skill, arm, goal); a chunk that runs off the end of its step repeats the
+    step's last command, exactly as the recorder padded it.
+    """
+    if stride <= 1:
+        return data
+    horizon = data.chunk.shape[1]
+    key = [
+        (int(s), int(loc[0]), str(sk), str(a), bytes(c))
+        for s, loc, sk, a, c in zip(
+            data.seed, data.locator, data.skill, data.arm, data.cond.astype(np.int8)
+        )
+    ]
+    row = data.locator[:, 1]
+    rebuilt = np.empty_like(data.chunk)
+    n = len(data)
+    for i in range(n):
+        end = i
+        while end + 1 < n and key[end + 1] == key[i] and row[end + 1] == row[end] + 1:
+            end += 1
+            if end - i >= horizon:
+                break
+        for k in range(horizon):
+            rebuilt[i, k] = data.chunk[min(i + k, end), 0]
+    return PolicyData(
+        shards=data.shards,
+        locator=data.locator,
+        proprio=data.proprio,
+        cond=data.cond,
+        chunk=rebuilt,
+        skill=data.skill,
+        arm=data.arm,
+        seed=data.seed,
+    )
+
+
 def split_by_seed(data: PolicyData, *, val_fraction: float = VAL_FRACTION
                   ) -> tuple[PolicyData, PolicyData, np.ndarray]:
     seeds = np.unique(data.seed)

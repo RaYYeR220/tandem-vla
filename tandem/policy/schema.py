@@ -28,9 +28,17 @@ IMAGE_SIZE: int = 128
 CAMERA_SLOTS: tuple[str, str] = ("overhead", "wrist")
 
 #: Chunk length the network predicts, and how much of it the runner executes before
-#: re-inferring. K = 16 is 0.32 s of control at 50 Hz; M = 8 halves that.
+#: re-inferring.
 CHUNK: int = 16
 EXECUTE: int = 8
+
+#: Control ticks between consecutive entries of a chunk. K = 16 consecutive 50 Hz commands
+#: covers 0.32 s, over which a servo target hardly moves -- an L1 loss on that window is
+#: minimised by a policy that echoes its own proprioception and commits to no motion at
+#: all. Spacing the chunk by 3 ticks stretches the same 16 numbers over 0.96 s, so the
+#: network has to predict where the arm is *going*. The runner interpolates between
+#: entries, and executes EXECUTE * CHUNK_STRIDE = 24 ticks before re-inferring.
+CHUNK_STRIDE: int = 3
 
 #: Skill vocabulary for the conditioning one-hot. The full set is reserved even though the
 #: distilled policy is only trained on pick and place, so the encoding never has to change.

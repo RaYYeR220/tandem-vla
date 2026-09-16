@@ -48,7 +48,7 @@ from tandem.perception.schema import (  # noqa: E402
 )
 from tandem.policy import dataset as policy_ds  # noqa: E402
 from tandem.policy.model import ActionChunkPolicy  # noqa: E402
-from tandem.policy.schema import ACTION_DIM, CHUNK  # noqa: E402
+from tandem.policy.schema import ACTION_DIM, CHUNK, CHUNK_STRIDE  # noqa: E402
 from tandem.sim import layout  # noqa: E402
 
 import openvino as ov  # noqa: E402
@@ -205,6 +205,7 @@ def verify_estimator(ir_path: Path, seeds: list[int], device: str) -> dict:
     the estimator is a drop-in for privileged state.
     """
     from tandem.perception import PerceptionEstimator, arm_proprioception, render_views
+    from tandem.perception.estimator import agreement_against_truth
     from tandem.sim.env import TandemEnv
     from tandem.sim.randomize import RandomizationSpec
 
@@ -219,11 +220,13 @@ def verify_estimator(ir_path: Path, seeds: list[int], device: str) -> dict:
 
     for seed in seeds:
         truth = env.reset(seed)
-        estimated = est.estimate(render_views(env), arm_proprioception(env),
-                                 t=truth["t"], seed=seed)
+        estimated = est.world_state(render_views(env), arm_proprioception(env),
+                                    t=truth["t"], seed=seed)
         latencies.append(est.last_latency_ms)
-        schema_ok &= set(truth) <= set(estimated)
+        schema_ok &= set(estimated) == set(truth) | {"perception"}
         schema_ok &= set(truth["objects"]) == set(estimated["objects"])
+        schema_ok &= all(set(estimated["objects"][n]) == set(truth["objects"][n])
+                         for n in truth["objects"])
         for name in PROPS:
             a, b = estimated["objects"][name], truth["objects"][name]
             for key in fields:
@@ -232,10 +235,16 @@ def verify_estimator(ir_path: Path, seeds: list[int], device: str) -> dict:
             checks += 1
         drawer_errors.append(abs(estimated["drawer"]["open_frac"] - truth["drawer"]["open_frac"]))
 
+    decisions = agreement_against_truth(env, est, seeds)
     env.close()
     return {
         "seeds": seeds,
-        "schema_superset_of_world_state": bool(schema_ok),
+        "schema_matches_world_state": bool(schema_ok),
+        "plan_match": decisions["plan_match"],
+        "verdict_sequence_match": decisions["verdict_sequence_match"],
+        "verdict_step_match": decisions["verdict_step_match"],
+        "gated_steps": decisions["steps_compared"],
+        "verdict_mismatches": decisions["verdict_mismatches"],
         "field_agreement": {k: round(v / max(1, checks), 4) for k, v in fields.items()},
         "median_pos_err_mm": round(float(np.median(errors_mm)), 2),
         "p90_pos_err_mm": round(float(np.percentile(errors_mm, 90)), 2),
@@ -275,6 +284,8 @@ def main() -> int:
     ap.add_argument("--verify-seeds", type=int, default=24,
                     help="live environment resets used to verify the drop-in estimator")
     ap.add_argument("--verify-seed0", type=int, default=400)
+    ap.add_argument("--chunk-stride", type=int, default=CHUNK_STRIDE,
+                    help="must match the stride the policy was trained with")
     ap.add_argument("--reuse-ir", action="store_true",
                     help="benchmark and score the IR already in --models instead of re-exporting")
     ap.add_argument("--skip-policy", action="store_true")
@@ -342,7 +353,8 @@ def main() -> int:
             }
             for name, row in accuracy["perception"]["live_drop_in"].items():
                 print(f"  live {name}: median {row['median_pos_err_mm']} mm, "
-                      f"reachable_by agreement {row['field_agreement']['reachable_by']:.3f}")
+                      f"plan match {row['plan_match']:.2f}, "
+                      f"verdict step match {row['verdict_step_match']:.3f}")
 
         bench_input = retarget([{"images": images[:1]}], ir_input_names(paths["fp32"]))[0]
         rows += sweep(
@@ -355,7 +367,9 @@ def main() -> int:
     # -------------------------------------------------------------------- policy
     if not args.skip_policy:
         print("\n== policy ==")
-        data = policy_ds.load(args.policy_data)
+        data = policy_ds.restride_chunks(
+            policy_ds.load(args.policy_data), args.chunk_stride
+        )
         _, val, val_seeds = policy_ds.split_by_seed(data)
         scored = min(args.accuracy_samples, len(val))
         rows_index = np.linspace(0, len(val) - 1, scored).astype(int)
@@ -400,6 +414,7 @@ def main() -> int:
         accuracy["policy"] = {
             "held_out_seeds": [int(val_seeds.min()), int(val_seeds.max())],
             "samples_scored": scored,
+            "chunk_stride": args.chunk_stride,
             "torch_fp32": policy_metrics(torch_raw.reshape(scored, -1), val.chunk),
         }
         for name, path in paths.items():
@@ -514,11 +529,39 @@ def _accuracy_markdown(accuracy: dict, report: dict) -> str:
                     continue
                 agree = row["field_agreement"]
                 lines.append(
-                    f"| {label} | {row['schema_superset_of_world_state']} | "
+                    f"| {label} | {row['schema_matches_world_state']} | "
                     f"{agree['reachable_by']:.3f} | {agree['on_slot']:.3f} | "
                     f"{agree['in_drawer']:.3f} | {agree['held_by']:.3f} | "
                     f"{row['median_pos_err_mm']:.1f} | {row['drawer_mae_frac']:.4f} |"
                 )
+        if live:
+            lines += [
+                "",
+                "**The decision the stack actually makes.** Both world states -- one from the "
+                "cameras, one privileged -- are pushed through `tandem.eval.tasks.canonical_plan` "
+                "and then through `tandem.gate.check_step` for every step of the privileged "
+                "plan, so a verdict difference is attributable to the scene estimate and "
+                "nothing else.",
+                "",
+                "| variant | plan identical | verdict sequence identical | per-step verdict "
+                "agreement | gated steps |",
+                "| --- | --- | --- | --- | --- |",
+            ]
+            for key, label in (("fp32", "OpenVINO FP32"), ("fp16", "OpenVINO FP16"),
+                               ("int8", "OpenVINO INT8")):
+                row = live.get(key)
+                if not row:
+                    continue
+                lines.append(
+                    f"| {label} | {row['plan_match']:.2f} | "
+                    f"{row['verdict_sequence_match']:.2f} | "
+                    f"{row['verdict_step_match']:.3f} | {row['gated_steps']} |"
+                )
+            worst = live.get("int8", {}).get("verdict_mismatches") or {}
+            if worst:
+                lines += ["", "Where INT8 disagreed with privileged state, by step:", ""]
+                for change, count in worst.items():
+                    lines.append(f"- {count}x `{change}`")
         lines += [
             "",
             "Symbolic agreement -- how often the booleans the planner and gate actually read "

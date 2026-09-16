@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tandem.policy import dataset as ds  # noqa: E402
 from tandem.policy.model import ActionChunkPolicy, parameter_count  # noqa: E402
-from tandem.policy.schema import ACTION_DIM, CHUNK  # noqa: E402
+from tandem.policy.schema import ACTION_DIM, CHUNK, CHUNK_STRIDE  # noqa: E402
 
 
 def to_device(batch: dict[str, np.ndarray], device: torch.device) -> dict[str, torch.Tensor]:
@@ -104,6 +104,8 @@ def main() -> int:
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--weight-decay", type=float, default=1e-4)
+    ap.add_argument("--chunk-stride", type=int, default=CHUNK_STRIDE,
+                    help="control ticks between chunk entries; 1 reproduces the raw recording")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--seed", type=int, default=0)
@@ -113,7 +115,7 @@ def main() -> int:
     device = torch.device(args.device)
 
     t0 = time.perf_counter()
-    data = ds.load(args.data, limit=args.limit)
+    data = ds.restride_chunks(ds.load(args.data, limit=args.limit), args.chunk_stride)
     train_data, val_data, val_seeds = ds.split_by_seed(data)
     skills, counts = np.unique(data.skill, return_counts=True)
     print(
@@ -186,6 +188,7 @@ def main() -> int:
         "batch": args.batch,
         "lr": args.lr,
         "chunk": CHUNK,
+        "chunk_stride": args.chunk_stride,
         "train_seconds": round(train_seconds, 1),
         "device": str(device),
         "history": history,
