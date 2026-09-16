@@ -88,6 +88,9 @@ python scripts/serve.py                               # the live dashboard on :8
 
 # The whole product in one command: speech in, cutlery on the table.
 python scripts/voice_to_table.py --audio assets/audio/set_the_table.wav --seed 1
+
+# The same instruction on ten randomized seeds, as one video.
+python scripts/record_seed_montage.py --seeds 10 --out results/seeds.mp4
 ```
 
 Nothing above needs an API key, a GPU, or a model download. The language planner falls back to
@@ -109,6 +112,9 @@ stage which backend actually served it. A captured run is in `results/voice_epis
 and final transcripts with measured latency. Speaking while the arms are moving raises a
 **barge-in**: the executor halts at the next safe point and re-plans. A stop vocabulary
 (`stop`, `wait`, `abort`, …) is recognised explicitly.
+
+A captured live session is in `PROOF.md` section 6 and `results/voice_transcript.jsonl`: 22
+partials, 11 finals, median final latency 922 ms, four barge-ins with the stop vocabulary flagged.
 
 With no `SPEECHMATICS_API_KEY`, the service switches to a scripted replay of the same events and
 labels itself `REPLAY — not live ASR` everywhere it appears. It never fabricates a transcript.
