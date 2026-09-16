@@ -1,5 +1,7 @@
 # Review this in five minutes
 
+Prefer to watch first? The [4:43 demo video](https://youtu.be/A4MDmp8kii0) opens on a refusal and closes on the pour that misses.
+
 Everything below runs from a clean clone with no API key, no GPU and no model download.
 
 ```bash
