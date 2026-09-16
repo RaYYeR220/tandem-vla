@@ -31,7 +31,11 @@ Every public statement this project makes, tagged by the evidence behind it. The
 | --- | --- | --- |
 | Models are exported to genuine OpenVINO IR and quantized with NNCF | **REPRODUCIBLE** | `tandem/bench/ovutil.py`, `scripts/export_models.py`; precision is detected by reading constant element types out of the IR, not from filenames |
 | Latency, throughput and model size per precision per device | **MEASURED-HERE** | `python scripts/benchmark_intel.py` — `PROOF.md §3` |
-| Quantization preserves task quality | **REPRODUCIBLE** | accuracy-preservation table in `PROOF.md §5`, FP32 vs FP16 vs INT8 on the same held-out seeds |
+| Quantization preserves task quality | **REPRODUCIBLE** | accuracy-preservation table in `PROOF.md` §4. FP32 to FP16 is free to three digits; INT8 costs 10 mm of median perception error and leaves the p90 tail untouched. |
+| Perception INT8 is faster and smaller on CPU | **MEASURED-HERE** | 5.02 ms p50 against 7.20 ms FP32, 1.73 MiB against 6.26 MiB. A quieter earlier measurement of the same pair read 2.61 vs 5.80 ms, so the honest range is 1.4x to 2.0x depending on machine load. |
+| Policy INT8 is a regression on this CPU | **MEASURED-HERE** | 6.13 ms p50 against FP32's 3.00 ms, reproduced across two runs, and roughly double the action error. The policy would ship at FP16. Published because a quantization section containing only wins is not a measurement. |
+| The gate reaches the same verdict from camera input as from privileged state | **REPRODUCIBLE** | 0.941 per-step agreement over 456 gated steps on 24 held-out seeds (`PROOF.md` §4). The *whole plan* comes out identical only 58% of the time, and that weaker number is published beside it. |
+| The distilled policy can drive the task | **NOT-CLAIMED** | It cannot. 0 of 18 matched picks against the expert's 14, 1.0 of 7 subgoals end to end against 4.17. Diagnosed, partially fixed, unsolved — `PROOF.md` §7. |
 | The benchmark runs on Intel Core Ultra Series 2/3 and reports CPU, iGPU and NPU | **NOT-CLAIMED** | We have no Intel silicon. The script is written to enumerate whatever OpenVINO exposes and prints its own caveat when the host is not Intel; it has never been run on a Core Ultra by us. |
 | Any latency figure here characterises Intel hardware | **NOT-CLAIMED** | The host is an AMD Ryzen 5 5600X with an NVIDIA discrete GPU. Both are named in every report. |
 

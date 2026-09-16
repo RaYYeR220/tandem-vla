@@ -1,0 +1,45 @@
+{
+  "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+  "physical_cores": 6,
+  "logical_cores": 12,
+  "ram_gb": 31.92,
+  "os": "Windows-10-10.0.26200-SP0",
+  "intel_validated": false,
+  "caveat": "Host CPU is 'AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD', not an Intel part. This run is NOT on Intel-validated hardware (no Core Ultra Series 2/3 here). OpenVINO's CPU/GPU plugins still execute and the numbers below are real measurements, but they characterize whatever silicon actually ran them, not Intel's target hardware. Any 'GPU' or 'NPU' device listed is reported by FULL_DEVICE_NAME below so it can't be mistaken for an Intel iGPU/NPU.",
+  "devices": [
+    {
+      "device": "CPU",
+      "full_device_name": "AMD Ryzen 5 5600X 6-Core Processor             ",
+      "optimization_capabilities": [
+        "FP32",
+        "INT8",
+        "BIN",
+        "EXPORT_IMPORT"
+      ],
+      "device_architecture": "intel64",
+      "range_for_async_infer_requests": [
+        1,
+        1,
+        1
+      ],
+      "device_type": "Type.INTEGRATED"
+    },
+    {
+      "device": "GPU",
+      "full_device_name": "NVIDIA GeForce RTX 4060 (dGPU)",
+      "optimization_capabilities": [
+        "FP32",
+        "BIN",
+        "INT8",
+        "EXPORT_IMPORT"
+      ],
+      "device_architecture": "GPU: vendor=0x10de arch=v8.9.0",
+      "range_for_async_infer_requests": [
+        1,
+        2,
+        1
+      ],
+      "device_type": "Type.DISCRETE"
+    }
+  ]
+}

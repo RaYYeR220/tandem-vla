@@ -459,6 +459,11 @@ def main() -> int:
         f"Measured with `tandem.bench.runner.sweep`, {args.iters} iterations after "
         f"{args.warmup} warm-up runs, batch 1.",
         "",
+        "Read the **p50** column, not the mean: this box runs the simulator and the "
+        "training jobs alongside the benchmark, and the resulting scheduler jitter lands "
+        "entirely in the mean and the p99 (note the standard deviations). The p50 is "
+        "stable across repeated runs; the mean is not.",
+        "",
         to_markdown(rows),
     ]
     (args.results / "openvino_latency.md").write_text("\n".join(markdown), encoding="utf-8")

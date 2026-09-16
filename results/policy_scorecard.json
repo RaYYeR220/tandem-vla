@@ -1,0 +1,484 @@
+{
+  "seeds": [
+    400,
+    401,
+    402,
+    403,
+    404,
+    405
+  ],
+  "dr_scale": 1.0,
+  "device": "CPU",
+  "execute": 8,
+  "ensemble": false,
+  "apply": "acting",
+  "train_seed_range": [
+    0,
+    127
+  ],
+  "precisions": {
+    "fp32": {
+      "skills": {
+        "matched": {
+          "oracle_pick": {
+            "attempts": 18,
+            "successes": 14,
+            "rate": 0.778,
+            "mean_seconds": 1.51,
+            "median_place_err_mm": null,
+            "codes": {
+              "OK": 14,
+              "OUT_OF_REACH": 4
+            }
+          },
+          "policy_pick": {
+            "attempts": 18,
+            "successes": 0,
+            "rate": 0.0,
+            "mean_seconds": 2.73,
+            "median_place_err_mm": null,
+            "codes": {
+              "GRASP_FAILED": 18
+            }
+          },
+          "oracle_place": {
+            "attempts": 11,
+            "successes": 11,
+            "rate": 1.0,
+            "mean_seconds": 1.35,
+            "median_place_err_mm": 2.2,
+            "codes": {
+              "OK": 11
+            }
+          },
+          "policy_place": {
+            "attempts": 11,
+            "successes": 0,
+            "rate": 0.0,
+            "mean_seconds": 2.93,
+            "median_place_err_mm": 106.5,
+            "codes": {
+              "PLACE_MISSED": 11
+            }
+          }
+        },
+        "pick_by_object": {
+          "plate": {
+            "oracle": {
+              "attempts": 6,
+              "successes": 6,
+              "rate": 1.0,
+              "mean_seconds": 1.51,
+              "median_place_err_mm": null,
+              "codes": {
+                "OK": 6
+              }
+            },
+            "policy": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0,
+              "mean_seconds": 2.67,
+              "median_place_err_mm": null,
+              "codes": {
+                "GRASP_FAILED": 6
+              }
+            }
+          },
+          "mug": {
+            "oracle": {
+              "attempts": 6,
+              "successes": 5,
+              "rate": 0.833,
+              "mean_seconds": 1.52,
+              "median_place_err_mm": null,
+              "codes": {
+                "OK": 5,
+                "OUT_OF_REACH": 1
+              }
+            },
+            "policy": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0,
+              "mean_seconds": 2.77,
+              "median_place_err_mm": null,
+              "codes": {
+                "GRASP_FAILED": 6
+              }
+            }
+          },
+          "bottle": {
+            "oracle": {
+              "attempts": 6,
+              "successes": 3,
+              "rate": 0.5,
+              "mean_seconds": 1.52,
+              "median_place_err_mm": null,
+              "codes": {
+                "OUT_OF_REACH": 3,
+                "OK": 3
+              }
+            },
+            "policy": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0,
+              "mean_seconds": 2.76,
+              "median_place_err_mm": null,
+              "codes": {
+                "GRASP_FAILED": 6
+              }
+            }
+          }
+        }
+      },
+      "episodes": {
+        "oracle": {
+          "episodes": 6,
+          "mean_subgoals": 4.167,
+          "subgoal_rate": {
+            "carton_emptied": 0.667,
+            "drawer_opened": 1.0,
+            "fork_placed": 1.0,
+            "mug_placed": 0.0,
+            "plate_placed": 1.0,
+            "spoon_placed": 0.5,
+            "water_in_cup": 0.0
+          },
+          "full_success_rate": 0.0,
+          "per_skill": {
+            "handoff": {
+              "attempts": 56,
+              "successes": 23,
+              "rate": 0.411
+            },
+            "hold": {
+              "attempts": 24,
+              "successes": 20,
+              "rate": 0.833
+            },
+            "home": {
+              "attempts": 4,
+              "successes": 4,
+              "rate": 1.0
+            },
+            "open_drawer": {
+              "attempts": 6,
+              "successes": 6,
+              "rate": 1.0
+            },
+            "pick": {
+              "attempts": 96,
+              "successes": 31,
+              "rate": 0.323
+            },
+            "place": {
+              "attempts": 45,
+              "successes": 16,
+              "rate": 0.356
+            },
+            "pour": {
+              "attempts": 24,
+              "successes": 0,
+              "rate": 0.0
+            }
+          },
+          "mean_wall_seconds": 101.7,
+          "subgoal_total": 7
+        },
+        "policy": {
+          "episodes": 6,
+          "mean_subgoals": 1.0,
+          "subgoal_rate": {
+            "carton_emptied": 0.0,
+            "drawer_opened": 1.0,
+            "fork_placed": 0.0,
+            "mug_placed": 0.0,
+            "plate_placed": 0.0,
+            "spoon_placed": 0.0,
+            "water_in_cup": 0.0
+          },
+          "full_success_rate": 0.0,
+          "per_skill": {
+            "handoff": {
+              "attempts": 29,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "hold": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "home": {
+              "attempts": 12,
+              "successes": 12,
+              "rate": 1.0
+            },
+            "open_drawer": {
+              "attempts": 6,
+              "successes": 6,
+              "rate": 1.0
+            },
+            "pick": {
+              "attempts": 107,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "place": {
+              "attempts": 35,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "pour": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0
+            }
+          },
+          "mean_wall_seconds": 93.4,
+          "subgoal_total": 7
+        }
+      },
+      "inference": {
+        "inferences": 5976,
+        "mean_ms": 5.627,
+        "p50_ms": 4.319,
+        "p90_ms": 8.448
+      }
+    },
+    "int8": {
+      "skills": {
+        "matched": {
+          "oracle_pick": {
+            "attempts": 18,
+            "successes": 14,
+            "rate": 0.778,
+            "mean_seconds": 1.51,
+            "median_place_err_mm": null,
+            "codes": {
+              "OK": 14,
+              "OUT_OF_REACH": 4
+            }
+          },
+          "policy_pick": {
+            "attempts": 18,
+            "successes": 0,
+            "rate": 0.0,
+            "mean_seconds": 2.29,
+            "median_place_err_mm": null,
+            "codes": {
+              "GRASP_FAILED": 18
+            }
+          },
+          "oracle_place": {
+            "attempts": 11,
+            "successes": 11,
+            "rate": 1.0,
+            "mean_seconds": 1.35,
+            "median_place_err_mm": 2.2,
+            "codes": {
+              "OK": 11
+            }
+          },
+          "policy_place": {
+            "attempts": 11,
+            "successes": 1,
+            "rate": 0.091,
+            "mean_seconds": 2.24,
+            "median_place_err_mm": 137.6,
+            "codes": {
+              "PLACE_MISSED": 10,
+              "OK": 1
+            }
+          }
+        },
+        "pick_by_object": {
+          "plate": {
+            "oracle": {
+              "attempts": 6,
+              "successes": 6,
+              "rate": 1.0,
+              "mean_seconds": 1.51,
+              "median_place_err_mm": null,
+              "codes": {
+                "OK": 6
+              }
+            },
+            "policy": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0,
+              "mean_seconds": 2.31,
+              "median_place_err_mm": null,
+              "codes": {
+                "GRASP_FAILED": 6
+              }
+            }
+          },
+          "mug": {
+            "oracle": {
+              "attempts": 6,
+              "successes": 5,
+              "rate": 0.833,
+              "mean_seconds": 1.52,
+              "median_place_err_mm": null,
+              "codes": {
+                "OK": 5,
+                "OUT_OF_REACH": 1
+              }
+            },
+            "policy": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0,
+              "mean_seconds": 2.24,
+              "median_place_err_mm": null,
+              "codes": {
+                "GRASP_FAILED": 6
+              }
+            }
+          },
+          "bottle": {
+            "oracle": {
+              "attempts": 6,
+              "successes": 3,
+              "rate": 0.5,
+              "mean_seconds": 1.52,
+              "median_place_err_mm": null,
+              "codes": {
+                "OUT_OF_REACH": 3,
+                "OK": 3
+              }
+            },
+            "policy": {
+              "attempts": 6,
+              "successes": 0,
+              "rate": 0.0,
+              "mean_seconds": 2.32,
+              "median_place_err_mm": null,
+              "codes": {
+                "GRASP_FAILED": 6
+              }
+            }
+          }
+        }
+      },
+      "episodes": {
+        "oracle": {
+          "episodes": 6,
+          "mean_subgoals": 4.167,
+          "subgoal_rate": {
+            "carton_emptied": 0.667,
+            "drawer_opened": 1.0,
+            "fork_placed": 1.0,
+            "mug_placed": 0.0,
+            "plate_placed": 1.0,
+            "spoon_placed": 0.5,
+            "water_in_cup": 0.0
+          },
+          "full_success_rate": 0.0,
+          "per_skill": {
+            "handoff": {
+              "attempts": 56,
+              "successes": 23,
+              "rate": 0.411
+            },
+            "hold": {
+              "attempts": 24,
+              "successes": 20,
+              "rate": 0.833
+            },
+            "home": {
+              "attempts": 4,
+              "successes": 4,
+              "rate": 1.0
+            },
+            "open_drawer": {
+              "attempts": 6,
+              "successes": 6,
+              "rate": 1.0
+            },
+            "pick": {
+              "attempts": 96,
+              "successes": 31,
+              "rate": 0.323
+            },
+            "place": {
+              "attempts": 45,
+              "successes": 16,
+              "rate": 0.356
+            },
+            "pour": {
+              "attempts": 24,
+              "successes": 0,
+              "rate": 0.0
+            }
+          },
+          "mean_wall_seconds": 101.7,
+          "subgoal_total": 7
+        },
+        "policy": {
+          "episodes": 6,
+          "mean_subgoals": 1.167,
+          "subgoal_rate": {
+            "carton_emptied": 0.167,
+            "drawer_opened": 1.0,
+            "fork_placed": 0.0,
+            "mug_placed": 0.0,
+            "plate_placed": 0.0,
+            "spoon_placed": 0.0,
+            "water_in_cup": 0.0
+          },
+          "full_success_rate": 0.0,
+          "per_skill": {
+            "handoff": {
+              "attempts": 17,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "hold": {
+              "attempts": 2,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "home": {
+              "attempts": 4,
+              "successes": 4,
+              "rate": 1.0
+            },
+            "open_drawer": {
+              "attempts": 8,
+              "successes": 8,
+              "rate": 1.0
+            },
+            "pick": {
+              "attempts": 91,
+              "successes": 1,
+              "rate": 0.011
+            },
+            "place": {
+              "attempts": 18,
+              "successes": 0,
+              "rate": 0.0
+            },
+            "pour": {
+              "attempts": 2,
+              "successes": 0,
+              "rate": 0.0
+            }
+          },
+          "mean_wall_seconds": 108.9,
+          "subgoal_total": 7
+        }
+      },
+      "inference": {
+        "inferences": 5184,
+        "mean_ms": 15.894,
+        "p50_ms": 8.207,
+        "p90_ms": 30.674
+      }
+    }
+  }
+}

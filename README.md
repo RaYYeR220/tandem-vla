@@ -159,19 +159,34 @@ than raising. Notable pieces:
 - **Blocked-motion detection.** If the IK solved but the arm never arrived, that is reported as
   a failure instead of being discovered three steps later.
 
-### 5. Perception and policy — learned, then quantized
+### 5. Perception and policy — one landed, one didn't
 `tandem/perception/` estimates object poses from the overhead and front cameras, replacing
-privileged simulator state. `tandem/policy/` distills the scripted expert into an ACT-style
-action-chunking policy over camera + proprioception. Both are exported to OpenVINO IR in FP32,
-FP16 and NNCF INT8 and run through `openvino.CompiledModel` in the closed loop.
+privileged simulator state. A shared conv trunk runs on each view separately and a per-object
+spatial-attention map gives an explicit image coordinate through a soft-argmax; because the
+cameras are rigid, the true positions can be projected analytically and used to supervise that
+attention directly, which roughly halved the error against letting it emerge from the position
+loss alone. Median position error **23.8 mm** over held-out seeds — 13–26 mm on the plate, mug
+and carton, **48–56 mm with a 340 mm p90 on the cutlery**, which is thin, metallic and usually
+inside a drawer. Drawer open-fraction is good to 2.2 mm.
+
+`tandem/policy/` distills the scripted expert into an ACT-style action-chunking policy. **It does
+not work.** Zero successful picks out of eighteen matched trials against the expert's fourteen,
+and 1.0 of 7 subgoals end to end against the expert's 4.17. The cause is diagnosed rather than
+guessed and is in the code: sixteen consecutive 50 Hz commands span a third of a second, over
+which a servo target barely moves, so the L1 objective is minimised by a policy that echoes its
+own proprioception and commits to no motion — val L1 under one degree while the arm sits still.
+Re-striding the chunk to cover about a second halved the residual distance to the object and
+still did not close a grasp. What remains is ordinary behaviour-cloning covariate shift.
+
+Both nets export to OpenVINO IR at FP32, FP16 and NNCF INT8, calibrated on real recorded
+observations rather than noise.
 
 `scripts/evaluate.py --perception` swaps the world source from the simulator to the estimator with
-one constructor argument, and runs the whole task on camera input. It works mechanically and scores
-0.14 against 0.64 — the network's median error is fine and its tail is not. Written up honestly in
-[`PROOF.md`](PROOF.md) section 5b, with the two things that would fix it.
-
-See [`PROOF.md`](PROOF.md) for what each one achieves, including where the policy is worse than the
-expert it was distilled from.
+one constructor argument and runs the whole task on camera input. The gate reaches the same verdict
+as it would from privileged state on **94.1% of 456 gated steps** — but the *whole plan* comes out
+identical only 58% of the time, because a nineteen-step plan need differ once, and the task score
+drops to 0.14 against 0.64. Every disagreement is the cutlery. Written up in
+[`PROOF.md`](PROOF.md) section 5b with the two things that would fix it.
 
 ### 6. Intel deployment
 `scripts/benchmark_intel.py` reports the host, every OpenVINO device it can see, and

@@ -70,6 +70,32 @@ on the wrong side of the 280 mm reach boundary, so the gate correctly refuses pi
 have succeeded. Full write-up and the two things that would fix it are in `PROOF.md` section 5b.
 The default evaluation therefore runs on privileged state, and says so in its own header.
 
+**The distilled policy does not work.** Zero successful picks in eighteen matched trials against
+the scripted expert's fourteen; 1.0 of 7 subgoals end to end against 4.17. The failure is
+understood — an action chunk covering a third of a second is minimised by predicting no motion,
+and re-striding it to about a second halved the residual distance without closing a grasp — but
+understood is not fixed. Every execution number elsewhere in this repo is the scripted expert
+unless it says otherwise, and the head-to-head is in `PROOF.md` section 7 rather than omitted.
+
+**Perception cannot see the water, and says so.** The particles are inside an opaque carton and
+inside a mug viewed from above. The estimator returns zeros for them and sets
+`perception.water_observed = False` rather than inventing a count.
+
+**Yaw is unlearnable for the round props.** Plate, mug and carton are rotationally symmetric, so
+their yaw label carries no information and the network scores about 90 degrees, which is chance.
+The elongated cutlery comes in at 14 degrees. Reported rather than quietly dropped from the table.
+
+**The perception dataset predates the current place-setting layout.** Slot positions moved after
+the 18k frames were collected. Nothing in the estimator hardcodes them — it reads `layout.SLOTS`
+live — but the training scenes are from the older arrangement, and the same checkpoint measures
+15.9 mm median on the old layout against 25.7 mm on the current one. Re-collecting and retraining
+is about 35 minutes and is the cheapest improvement available; it was not done, and the worse
+number is the one published.
+
+**OpenVINO's GPU plugin cannot compile the policy transformer** on this machine's NVIDIA card
+(`CL_BUILD_PROGRAM_FAILURE`). It is recorded as a skipped row with the reason in the benchmark CSV
+rather than dropped from the table.
+
 **The gripper envelope is smaller than it looks.** The SO-101's fingertips travel 133 mm apart,
 but the jaw faces close in well ahead of them; the real usable opening is about 50 mm. Every prop
 is sized to fit inside that. A wider plate is not a harder version of this task — it is an

@@ -232,6 +232,7 @@ def episode_trials(env: TandemEnv, executor: Executor, seeds: list[int], *,
                    budget: float) -> dict:
     subgoals: dict[str, int] = {}
     completed: list[int] = []
+    totals: list[int] = []
     per_skill: dict[str, dict[str, int]] = {}
     seconds: list[float] = []
 
@@ -249,6 +250,7 @@ def episode_trials(env: TandemEnv, executor: Executor, seeds: list[int], *,
               f"{record.score.get('total')} subgoals ({seconds[-1]:.0f}s)", flush=True)
         score = record.score
         completed.append(int(score.get("completed", 0)))
+        totals.append(int(score.get("total", 0)))
         for name, value in score.get("subgoals", {}).items():
             subgoals[name] = subgoals.get(name, 0) + int(bool(value))
         for step in record.steps:
@@ -257,11 +259,16 @@ def episode_trials(env: TandemEnv, executor: Executor, seeds: list[int], *,
             entry["successes"] += int(step.ok)
 
     n = max(1, len(seeds))
+    total = max(totals) if totals else 0
     return {
         "episodes": len(seeds),
+        "subgoal_total": total,
         "mean_subgoals": round(float(np.mean(completed)), 3),
+        "per_episode_subgoals": completed,
         "subgoal_rate": {k: round(v / n, 3) for k, v in sorted(subgoals.items())},
-        "full_success_rate": round(sum(1 for c in completed if c == 6) / n, 3),
+        "full_success_rate": round(
+            sum(1 for c, t in zip(completed, totals) if t and c == t) / n, 3
+        ),
         "per_skill": {
             k: {**v, "rate": round(v["successes"] / max(1, v["attempts"]), 3)}
             for k, v in sorted(per_skill.items())
@@ -299,7 +306,7 @@ def markdown(results: dict) -> str:
                 f"{row['median_place_err_mm'] if row['median_place_err_mm'] is not None else '-'} |"
             )
     lines += ["", "## End-to-end episodes (full plan, gate and replanner active)", ""]
-    lines.append("| precision | controller | episodes | mean subgoals / 6 | full success | "
+    lines.append("| precision | controller | episodes | mean subgoals | full success | "
                  "pick rate | place rate | mean wall s |")
     lines.append("| --- | --- | --- | --- | --- | --- | --- | --- |")
     for precision, block in results["precisions"].items():
@@ -311,7 +318,8 @@ def markdown(results: dict) -> str:
             places = row["per_skill"].get("place", {})
             label = precision if who == "policy" else "n/a"
             lines.append(
-                f"| {label} | {who} | {row['episodes']} | {row['mean_subgoals']} | "
+                f"| {label} | {who} | {row['episodes']} | "
+                f"{row['mean_subgoals']} / {row.get('subgoal_total', '?')} | "
                 f"{row['full_success_rate']:.2f} | {picks.get('rate', '-')} | "
                 f"{places.get('rate', '-')} | {row['mean_wall_seconds']} |"
             )
@@ -386,18 +394,19 @@ def main() -> int:
                 "policy": episode_trials(env, learned, seeds, budget=args.budget),
             }
             for who, row in block["episodes"].items():
-                print(f"    {who:<7} mean subgoals {row['mean_subgoals']}/6, "
+                print(f"    {who:<7} mean subgoals {row['mean_subgoals']}/"
+                      f"{row['subgoal_total']}, "
                       f"full success {row['full_success_rate']:.0%}")
 
         block["inference"] = runner.latency_stats()
         results["precisions"][precision] = block
 
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "policy_headtohead.json").write_text(
+    (args.out / "policy_scorecard.json").write_text(
         json.dumps(results, indent=2, default=str), encoding="utf-8"
     )
-    (args.out / "policy_headtohead.md").write_text(markdown(results), encoding="utf-8")
-    print(f"\nwrote {args.out}/policy_headtohead.json|.md")
+    (args.out / "policy_scorecard.md").write_text(markdown(results), encoding="utf-8")
+    print(f"\nwrote {args.out}/policy_scorecard.json|.md")
     return 0
 
 
