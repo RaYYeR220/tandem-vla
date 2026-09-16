@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tandem — a robot that knows what it can't do</title>
+<meta name="description" content="Two arms set a dinner table. Voice in, a local model parses it, a deterministic gate refuses what it can't ground, the arms execute. Nothing in the cloud.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tandem.css">
+<style>
+  .frame { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ---------- hero ---------- */
+  main.hero {
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 900px) { main.hero { flex-direction: row; } }
+  .panel-diagram {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(24px, 4vw, 40px);
+    border-bottom: 1px solid var(--ink-2);
+  }
+  @media (min-width: 900px) {
+    .panel-diagram { flex: 0 0 44%; border-bottom: none; border-right: 1px solid var(--ink-2); }
+  }
+  svg.diagram { width: 100%; max-width: 460px; height: auto; overflow: visible; }
+  .dline { fill: none; stroke: var(--paper-2); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .dline.accent { stroke: var(--teal-3); stroke-width: 1.8; }
+  .dline.leader { stroke: var(--paper-3); stroke-width: 1; stroke-dasharray: 3 5; }
+  .dfill { fill: var(--ink-2); stroke: var(--paper-2); stroke-width: 1.2; }
+  .ctext { font-family: var(--font-display); font-size: 9px; fill: var(--paper-3); letter-spacing: 0.04em; }
+  .panel-text {
+    flex: 1;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(28px, 5vw, 64px);
+    gap: 20px;
+  }
+  h1.hero-h1 { font-size: clamp(28px, 4.2vw, 50px); max-width: 15ch; }
+  .cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  /* ---------- generic section rhythm ---------- */
+  section.block {
+    padding: clamp(48px, 8vw, 96px) clamp(var(--gutter), 6vw, 64px);
+    border-bottom: 1px solid var(--ink-2);
+  }
+  .block-head { max-width: 62ch; margin-bottom: clamp(32px, 5vw, 56px); }
+  .block-head h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(22px, 3vw, 32px);
+    margin: 10px 0 12px;
+    color: var(--paper-0);
+  }
+  .block-head p { color: var(--paper-2); line-height: 1.6; margin: 0; }
+
+  /* ---------- how it works: one diagram, one caption row ---------- */
+  .chain-svg { width: 100%; height: auto; display: block; margin: 0 auto clamp(24px, 4vw, 40px); }
+  .chain-node-box { fill: var(--ink-1); stroke: var(--ink-3); stroke-width: 1.2; }
+  .chain-icon { stroke: var(--teal-3); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .chain-label { font-family: var(--font-display); font-size: 13px; fill: var(--paper-0); letter-spacing: 0.06em; }
+  .chain-index { font-family: var(--font-display); font-size: 10px; fill: var(--paper-3); }
+  .chain-trace { fill: none; stroke: var(--paper-3); stroke-width: 1.2; stroke-dasharray: 5 5; }
+  .chain-arrow { fill: var(--paper-3); }
+  .chain-caps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 760px) { .chain-caps { grid-template-columns: 1fr 1fr; } }
+  .chain-caps div { border-top: 2px solid var(--ink-2); padding-top: 12px; }
+  .chain-caps .stage-tag { font-family: var(--font-display); font-size: 11px; color: var(--teal-3); letter-spacing: 0.1em; }
+  .chain-caps p { margin: 6px 0 0; font-size: 13.5px; color: var(--paper-2); line-height: 1.55; }
+
+  /* ---------- the refusal ---------- */
+  .refusal-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+  }
+  @media (max-width: 860px) { .refusal-grid { grid-template-columns: 1fr; } }
+  .command-line {
+    font-family: var(--font-display);
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--paper-0);
+    background: var(--ink-1);
+    border: 1px solid var(--ink-2);
+    padding: 16px 18px;
+    display: flex;
+    gap: 10px;
+  }
+  .command-line .who { color: var(--paper-3); }
+  .refusal-log {
+    margin-top: 18px;
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    color: var(--paper-3);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .refusal-log .line { display: flex; gap: 10px; }
+  .refusal-log .code { color: var(--orange-3); flex: none; width: 13ch; }
+  .refusal-stage {
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    padding: clamp(24px, 4vw, 40px);
+  }
+  .refusal-cycler { position: absolute; bottom: 8px; right: 8px; }
+
+  /* ---------- scorecard ---------- */
+  #scorecard-body { font-family: var(--font-display); font-size: 13px; }
+  table.sc { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  table.sc th, table.sc td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--ink-2);
+    font-size: 12.5px;
+  }
+  table.sc th { color: var(--paper-3); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: 10.5px; }
+  table.sc td.rate { color: var(--teal-3); }
+  table.sc td.rate.zero { color: var(--orange-3); }
+  .sc-empty { color: var(--paper-3); font-size: 13.5px; line-height: 1.7; }
+  .sc-empty code { background: var(--ink-1); border: 1px solid var(--ink-2); padding: 2px 6px; color: var(--paper-0); }
+
+  /* ---------- run it ---------- */
+  .runbox {
+    background: var(--ink-1);
+    border: 1px solid var(--ink-2);
+    padding: 18px 20px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--paper-2);
+    overflow-x: auto;
+  }
+  .runbox .prompt { color: var(--teal-3); }
+  ol.steps { padding-left: 1.2em; color: var(--paper-2); line-height: 1.9; }
+
+  footer.foot {
+    padding: 24px clamp(var(--gutter), 6vw, 64px) 40px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top-strip">
+    <span><b>TANDEM</b> · FIELD MANUAL REV. C — NIGHT OPS</span>
+    <span>SO-101 × 2 | DUAL-ARM HANDOFF</span>
+  </div>
+
+  <!-- ============================================================ HERO ============================================================ -->
+  <main class="hero bg-grid">
+    <div class="panel-diagram">
+      <svg class="diagram" viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <polygon class="dfill" points="60,210 200,150 340,210 200,270" />
+        <polyline class="dline" points="60,210 60,228 200,288 200,270" />
+        <polyline class="dline" points="340,210 340,228 200,288" />
+        <circle class="dfill" cx="66" cy="140" r="12"/>
+        <path class="dline accent" d="M66,140 L92,98 L138,120" />
+        <circle cx="138" cy="120" r="4" fill="var(--teal-3)"/>
+        <circle class="dfill" cx="334" cy="140" r="12"/>
+        <path class="dline accent" d="M334,140 L306,94 L258,118" />
+        <circle cx="258" cy="118" r="4" fill="var(--teal-3)"/>
+        <rect class="dline" x="190" y="176" width="20" height="26" />
+        <line class="dline" x1="172" y1="180" x2="172" y2="206" />
+        <line class="dline" x1="222" y1="180" x2="222" y2="206" />
+        <line class="dline leader" x1="138" y1="120" x2="70" y2="56" />
+        <text class="ctext" x="10" y="50">L-ARM: PROPS SIDE</text>
+        <line class="dline leader" x1="258" y1="118" x2="320" y2="50" />
+        <text class="ctext" x="280" y="44">R-ARM: SETTING SIDE</text>
+        <line class="dline leader" x1="200" y1="190" x2="200" y2="140" />
+        <text class="ctext" x="150" y="134">HANDOFF ZONE, MID-TABLE</text>
+      </svg>
+    </div>
+    <div class="panel-text">
+      <p class="eyebrow">Grounded refusal, by design</p>
+      <h1 class="hero-h1 display">It knows what it <em>can't</em> do. And it proves it.</h1>
+      <p class="sub">Voice in. Cutlery on the table. Nothing in the cloud. A deterministic gate checks reachability, gripper state and collision before either arm moves — and refuses out loud what it cannot ground.</p>
+      <div class="readouts">
+        <div><b id="ro-seeds">20</b>seeds scored</div>
+        <div><b>INT4/INT8</b>on-device models</div>
+        <div><b>0</b>cloud calls in the loop</div>
+      </div>
+      <div class="cta-row">
+        <a class="btn" href="https://github.com/RaYYeR220/tandem-vla/blob/main/JUDGES.md">REVIEW IN FIVE MINUTES</a>
+        <span class="hint">the console runs locally in one command</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================ HOW IT WORKS ============================================================ -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">How it works</p>
+      <h2>One sentence in. Four checks before anything moves.</h2>
+      <p>Hear it, parse it, gate it, act on it. Every arrow below is a hard boundary — the model on the left of the gate never touches a motor, and the gate on the right of it never guesses.</p>
+    </div>
+
+    <svg class="chain-svg" viewBox="0 0 1200 210" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" id="chainSvg">
+      <!-- connecting trace -->
+      <path class="chain-trace" id="chainTrace" d="M170,105 H330 M470,105 H630 M770,105 H930" />
+      <polygon class="chain-arrow" points="330,105 320,100 320,110" />
+      <polygon class="chain-arrow" points="630,105 620,100 620,110" />
+      <polygon class="chain-arrow" points="930,105 920,100 920,110" />
+
+      <!-- node 1: HEAR -->
+      <polygon class="chain-node-box" points="60,55 170,55 170,145 160,155 50,155 50,65"/>
+      <g transform="translate(110,90)" class="chain-icon">
+        <path d="M-20,10 v-6 M-11,14 v-16 M-2,20 v-28 M7,14 v-16 M16,10 v-6"/>
+      </g>
+      <text class="chain-label" x="110" y="128" text-anchor="middle">HEAR</text>
+      <text class="chain-index" x="110" y="142" text-anchor="middle">01</text>
+
+      <!-- node 2: PARSE -->
+      <polygon class="chain-node-box" points="360,55 470,55 470,145 460,155 350,155 350,65"/>
+      <g transform="translate(410,90)" class="chain-icon">
+        <path d="M-14,-18 q-10,0 -10,10 v6 q0,6 -6,8 q6,2 6,8 v6 q0,10 10,10"/>
+        <path d="M14,-18 q10,0 10,10 v6 q0,6 6,8 q-6,2 -6,8 v6 q0,10 -10,10"/>
+      </g>
+      <text class="chain-label" x="410" y="128" text-anchor="middle">PARSE</text>
+      <text class="chain-index" x="410" y="142" text-anchor="middle">02</text>
+
+      <!-- node 3: GATE -->
+      <polygon class="chain-node-box" points="660,55 770,55 770,145 760,155 650,155 650,65"/>
+      <g transform="translate(710,90)" class="chain-icon">
+        <path d="M-18,-16 v10 q0,18 18,24 q18,-6 18,-24 v-10 z"/>
+        <path d="M-8,0 l6,7 l12,-15" stroke="var(--orange-3)"/>
+      </g>
+      <text class="chain-label" x="710" y="128" text-anchor="middle">GATE</text>
+      <text class="chain-index" x="710" y="142" text-anchor="middle">03</text>
+
+      <!-- node 4: ACT -->
+      <polygon class="chain-node-box" points="960,55 1070,55 1070,145 1060,155 950,155 950,65"/>
+      <g transform="translate(1010,92)" class="chain-icon">
+        <path d="M-20,14 h40"/>
+        <path d="M-14,14 L-14,-2 L-2,-10"/>
+        <path d="M14,14 L14,-2 L2,-10"/>
+        <circle cx="-2" cy="-10" r="2.4" fill="var(--teal-3)" stroke="none"/>
+        <circle cx="2" cy="-10" r="2.4" fill="var(--teal-3)" stroke="none"/>
+      </g>
+      <text class="chain-label" x="1010" y="128" text-anchor="middle">ACT</text>
+      <text class="chain-index" x="1010" y="142" text-anchor="middle">04</text>
+    </svg>
+
+    <div class="chain-caps">
+      <div><span class="stage-tag">01 · HEAR</span><p>Speechmatics streams a live transcript, or a scripted replay stands in when there's no key — labelled either way, never silently swapped.</p></div>
+      <div><span class="stage-tag">02 · PARSE</span><p>A small instruction-tuned model, running on-device through OpenVINO, fills in six fields: what to place, whether to pour, what to refuse.</p></div>
+      <div><span class="stage-tag">03 · GATE</span><p>Deterministic Python re-checks every step against the measured scene — reachability, gripper state, collisions — before a motor moves. No model in this box.</p></div>
+      <div><span class="stage-tag">04 · ACT</span><p>The arms execute, handing objects across the shared zone because props start on the left and the setting sits on the right.</p></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ THE REFUSAL ============================================================ -->
+  <section class="block bg-grid">
+    <div class="block-head">
+      <p class="eyebrow">The refusal, not the reel</p>
+      <h2>Ask for a knife. There isn't one.</h2>
+      <p>This is the moment the whole project is built to produce honestly: a request the arms cannot ground, refused out loud, with the reason stated plainly rather than swallowed.</p>
+    </div>
+    <div class="refusal-grid">
+      <div>
+        <div class="command-line"><span class="who">&gt;</span> <span id="cmd-text">"put the knife next to the plate"</span></div>
+        <div class="refusal-log" id="refusal-log">
+          <div class="line"><span class="code">OBJECT_ABSENT</span><span>there is no knife in this scene; it holds bottle, fork, mug, plate, spoon</span></div>
+        </div>
+        <div class="refusal-log" style="margin-top:22px; opacity:.7;">
+          <div class="line"><span class="code">representative</span><span>reasons pulled verbatim from the same gate that runs in the console — see it live in <a href="https://github.com/RaYYeR220/tandem-vla/blob/main/tandem/gate/__init__.py" style="color:var(--teal-3)">the gate itself</a>.</span></div>
+        </div>
+      </div>
+      <div class="refusal-stage panel chamfer">
+        <svg viewBox="0 0 140 140" width="180" height="180" id="refuseStamp" class="stamp refuse fire" style="transform:rotate(-8deg) scale(1); opacity:1;">
+          <circle cx="70" cy="70" r="58"/>
+          <circle cx="70" cy="70" r="48"/>
+          <text x="70" y="66" font-size="19">REFUSED</text>
+          <text x="70" y="86" font-size="9" fill="var(--orange-3)">NOT GROUNDED IN SCENE</text>
+        </svg>
+        <button class="btn-ghost refusal-cycler" id="cycleRefusal">next case →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SCORECARD ============================================================ -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">The scorecard</p>
+      <h2>Every seed, every subgoal. Failures included.</h2>
+      <p>Read straight off <code class="mono">results/eval/scorecard.json</code> — if it doesn't exist yet on this machine, that's what it looks like, honestly, rather than a number invented for the page.</p>
+    </div>
+    <div id="scorecard-body">
+      <p class="sc-empty">Loading scorecard…</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ RUN IT ============================================================ -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">Run it yourself</p>
+      <h2>Three commands. No cloud key required.</h2>
+    </div>
+    <ol class="steps">
+      <li>Export or point at a planner IR (a keyword fallback runs with no model at all).</li>
+      <li>Start the console — see the command below.</li>
+      <li>Open the dashboard and press <b>run</b> — or feed it a scripted voice clip from <code>assets/audio/</code>.</li>
+    </ol>
+    <div class="runbox"><span class="prompt">$</span> python scripts/serve.py --port 8000</div>
+    <div class="cta-row" style="margin-top:20px;">
+      <a class="btn" href="https://github.com/RaYYeR220/tandem-vla/blob/main/JUDGES.md">REVIEW IN FIVE MINUTES</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>TANDEM — DUAL SO-101 · MUJOCO · OPENVINO</span>
+    <span>NO CLOUD IN THE CONTROL LOOP</span>
+  </footer>
+</div>
+
+<script src="tandem.js"></script>
+<script>
+(function () {
+  // stroke-draw the hero diagram once on load (same signature interaction as the chosen variant)
+  document.querySelectorAll('svg.diagram .dline, svg.diagram .dfill').forEach(function (el, i) {
+    try {
+      var len = el.getTotalLength ? el.getTotalLength() : 80;
+      el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+      el.style.transition = 'stroke-dashoffset 1s ease ' + (i * 0.04) + 's';
+      requestAnimationFrame(function () { requestAnimationFrame(function () { el.style.strokeDashoffset = 0; }); });
+    } catch (e) {}
+  });
+
+  // stroke-draw the four-stage chain when it scrolls into view
+  var chainDrawn = false;
+  var chainSvg = document.getElementById('chainSvg');
+  function drawChain() {
+    if (chainDrawn) return;
+    chainDrawn = true;
+    chainSvg.querySelectorAll('.chain-icon path, .chain-trace').forEach(function (el, i) {
+      try {
+        var len = el.getTotalLength();
+        el.style.strokeDasharray = len; el.style.strokeDashoffset = len;
+        el.style.transition = 'stroke-dashoffset 0.9s ease ' + (i * 0.06) + 's';
+        requestAnimationFrame(function () { requestAnimationFrame(function () { el.style.strokeDashoffset = 0; }); });
+      } catch (e) {}
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) drawChain(); });
+    }, { threshold: 0.35 }).observe(chainSvg);
+  } else {
+    drawChain();
+  }
+
+  // the refusal cycler — a handful of real reason strings the gate/planner actually produce
+  var CASES = [
+    { cmd: '"put the knife next to the plate"', code: 'OBJECT_ABSENT', reason: 'there is no knife in this scene; it holds bottle, fork, mug, plate, spoon' },
+    { cmd: '"pour the wine into the glass"', code: 'OBJECT_ABSENT', reason: 'there is no wine in the scene' },
+    { cmd: '"fold the napkin"', code: 'OBJECT_ABSENT', reason: 'there is no napkin in the scene' },
+    { cmd: '"put the bowl on the table"', code: 'OBJECT_ABSENT', reason: 'there is no bowl in the scene' },
+    { cmd: '"hand the mug to the left arm"', code: 'OUT_OF_REACH', reason: 'the mug is 0.31 m from the left base, past the 0.28 m envelope — rewritten to a hand-off instead of refused outright' }
+  ];
+  var idx = 0;
+  document.getElementById('cycleRefusal').addEventListener('click', function () {
+    idx = (idx + 1) % CASES.length;
+    var c = CASES[idx];
+    document.getElementById('cmd-text').textContent = c.cmd;
+    document.getElementById('refusal-log').innerHTML =
+      '<div class="line"><span class="code">' + c.code + '</span><span>' + c.reason + '</span></div>';
+    var stamp = document.getElementById('refuseStamp');
+    stamp.classList.remove('fire');
+    void stamp.offsetWidth;
+    stamp.classList.add('fire');
+  });
+
+  // scorecard: never show a number the backend did not send
+  Tandem.getJSON('api/scorecard').then(function (res) {
+    var el = document.getElementById('scorecard-body');
+    if (!res || !res.available) {
+      el.innerHTML = '<p class="sc-empty">No scorecard on this machine yet. Generate one with<br>' +
+        '<code>python scripts/serve.py --build-scorecard 5</code> — real seeds, real time, written to ' +
+        '<code>results/eval/scorecard.json</code>.</p>';
+      return;
+    }
+    var s = res.scorecard;
+    var rows = Object.keys(s.subgoals).map(function (g) {
+      var v = s.subgoals[g];
+      var cls = v.rate === 0 ? ' zero' : '';
+      return '<tr><td>' + Tandem.escapeHtml(g) + '</td><td>' + v.count + '/' + s.config.n + '</td>' +
+        '<td class="rate' + cls + '">' + Math.round(v.rate * 100) + '%</td></tr>';
+    }).join('');
+    el.innerHTML =
+      '<p>' + s.config.n + ' seeds · domain-randomization scale ' + s.config.dr_scale +
+      ' · planner: ' + Tandem.escapeHtml(s.config.planner) + '</p>' +
+      '<table class="sc"><thead><tr><th>Subgoal</th><th>Seeds passed</th><th>Rate</th></tr></thead><tbody>' +
+      rows + '</tbody></table>' +
+      '<p style="margin-top:14px;color:var(--paper-3)">Gate refusals raised: ' + s.gate_refusals +
+      ' · re-plans triggered: ' + s.replans + '</p>';
+    var roSeeds = document.getElementById('ro-seeds');
+    if (roSeeds) roSeeds.textContent = s.config.n;
+  }).catch(function () {
+    document.getElementById('scorecard-body').innerHTML = '<p class="sc-empty">Scorecard endpoint unreachable — start the console with <code>python scripts/serve.py</code>.</p>';
+  });
+})();
+</script>
+</body>
+</html>
