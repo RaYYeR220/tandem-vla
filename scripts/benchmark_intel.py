@@ -37,7 +37,7 @@ import openvino as ov
 import torch
 import torch.nn as nn
 
-from tandem.bench import ovutil, runner
+from tandem.bench import ovutil, probe, runner
 
 DEFAULT_MODELS_DIR = REPO_ROOT / "models"
 DEFAULT_OUT_DIR = REPO_ROOT / "results"
@@ -154,6 +154,15 @@ def _compute_speedups(rows: list[dict[str, Any]]) -> None:
             row["speedup_vs_fp32_cpu"] = round(row["throughput_fps"] / base_fps, 3) if base_fps else None
 
 
+def _available_devices() -> list[str]:
+    import openvino as ov
+
+    try:
+        return list(ov.Core().available_devices)
+    except Exception:  # noqa: BLE001 - an unusable core is reported by the device report
+        return ["CPU"]
+
+
 def run_sweep_for_groups(
     groups: dict[str, dict[str, Path]],
     static_dir: Path,
@@ -172,6 +181,7 @@ def run_sweep_for_groups(
                 static_variants[variant_label] = static_path
                 if path == representative:
                     group_inputs = inputs
+                    representative_static = static_path
             if group_inputs is None:  # pragma: no cover - representative always iterated above
                 group_inputs = ovutil.synthesize_inputs(representative)
         except Exception as exc:
@@ -182,7 +192,20 @@ def run_sweep_for_groups(
             all_rows.append({"model": group_name, "device": "-", "hint": "-", "skipped": True, "reason": reason})
             continue
 
-        rows = runner.sweep(static_variants, group_inputs, devices=devices, warmup=warmup, iters=iters)
+        # Probe each non-CPU device in a subprocess before using it. Some plugin failures are
+        # native aborts rather than Python exceptions -- the GPU plugin on this development box
+        # dies inside clBuildProgram compiling a transformer -- and a benchmark a reviewer is
+        # told to run must report that, not take the interpreter down with it.
+        group_devices = devices if devices is not None else _available_devices()
+        usable, crashed = probe.usable_devices(representative_static, list(group_devices))
+        for entry in crashed:
+            print(f"  (skipping {entry['device']} for '{group_name}': {entry['reason']})")
+            all_rows.append({
+                "model": group_name, "device": entry["device"], "hint": "-",
+                "skipped": True, "reason": entry["reason"],
+            })
+
+        rows = runner.sweep(static_variants, group_inputs, devices=usable, warmup=warmup, iters=iters)
         tag = "SELF-TEST:" if "_selftest" in group_name.lower() else ""
         for row in rows:
             row["model"] = f"{tag}{group_name}_{row['model']}"

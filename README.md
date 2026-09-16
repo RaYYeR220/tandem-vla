@@ -233,7 +233,7 @@ sentence in all of them. Each tile carries its seed and its subgoal tally. Rebui
 <!-- RESULTS:START -->
 **Safety gate — 24/24 cases.** 12/12 refused correctly, 4/4 repaired rather than refused, 8/8 legitimate steps allowed through — the negative control, without which the refusal score would mean nothing.
 
-**Task — 20 randomized seeds, mean subgoal fraction 0.64.**
+**Task — 20 randomized seeds, mean subgoal fraction 0.65.**
 
 | subgoal | rate |
 | --- | --- |
@@ -242,10 +242,10 @@ sentence in all of them. Each tile carries its seed and its subgoal tally. Rebui
 | fork_placed | 18/20 (90%) |
 | spoon_placed | 13/20 (65%) |
 | mug_placed | 11/20 (55%) |
-| carton_emptied | 10/20 (50%) |
+| carton_emptied | 11/20 (55%) |
 | water_in_cup | 0/20 (0%) |
 
-Hand-offs performed: `{'relay': 86}`. Gate refusals raised during execution: 352. Re-plans: 200.
+Hand-offs performed: `{'relay': 86}`. Gate refusals raised during execution: 375. Re-plans: 224.
 
 **Quantization.** Perception and the distilled policy are exported to OpenVINO IR in FP32, FP16 and NNCF INT8, with the accuracy cost of each measured on held-out seeds rather than assumed — see `PROOF.md` section 4.
 <!-- RESULTS:END -->
