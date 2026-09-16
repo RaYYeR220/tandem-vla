@@ -1,0 +1,30 @@
+# Core simulation and control
+mujoco>=3.13.0
+numpy>=2.0
+scipy>=1.14
+
+# Intel inference
+openvino>=2026.3.0
+nncf>=2.14
+
+# Learned components (CPU wheels by default; install a CUDA build to train on a GPU)
+torch>=2.5
+torchvision>=0.20
+
+# Vision / media
+opencv-python>=4.10
+imageio>=2.35
+imageio-ffmpeg>=0.5
+
+# Voice
+speechmatics-rt>=1.1.0
+sounddevice>=0.5
+python-dotenv>=1.0
+
+# Dashboard
+fastapi>=0.115
+uvicorn>=0.32
+
+# Tooling
+tqdm>=4.66
+pytest>=8.0
