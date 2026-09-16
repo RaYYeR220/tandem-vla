@@ -163,8 +163,13 @@ privileged simulator state. `tandem/policy/` distills the scripted expert into a
 action-chunking policy over camera + proprioception. Both are exported to OpenVINO IR in FP32,
 FP16 and NNCF INT8 and run through `openvino.CompiledModel` in the closed loop.
 
-See [`PROOF.md`](PROOF.md) for what each one actually achieves, including where the policy is
-worse than the expert it was distilled from.
+`scripts/evaluate.py --perception` swaps the world source from the simulator to the estimator with
+one constructor argument, and runs the whole task on camera input. It works mechanically and scores
+0.14 against 0.64 — the network's median error is fine and its tail is not. Written up honestly in
+[`PROOF.md`](PROOF.md) section 5b, with the two things that would fix it.
+
+See [`PROOF.md`](PROOF.md) for what each one achieves, including where the policy is worse than the
+expert it was distilled from.
 
 ### 6. Intel deployment
 `scripts/benchmark_intel.py` reports the host, every OpenVINO device it can see, and

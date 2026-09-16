@@ -56,6 +56,15 @@ The honest read is that a reliable pour needs the carton held rigidly rather tha
 wrist-mounted fixture, or a grasp that constrains rotation about the jaw axis. That is a hardware
 answer to a hardware problem, and we did not have one.
 
+**The camera-based estimator is a drop-in, but it does not yet carry the task.** Running the
+evaluation with `--perception` swaps one constructor argument and the gate and planner read the
+scene from two rendered views through an OpenVINO INT8 network instead of from privileged state.
+It works mechanically and the task collapses: 0.14 mean subgoal fraction against 0.64. The reason
+is a tail, not a bias — median position error 35 mm but p90 of 417 mm, and 30% of objects end up
+on the wrong side of the 280 mm reach boundary, so the gate correctly refuses picks that would
+have succeeded. Full write-up and the two things that would fix it are in `PROOF.md` section 5b.
+The default evaluation therefore runs on privileged state, and says so in its own header.
+
 **The gripper envelope is smaller than it looks.** The SO-101's fingertips travel 133 mm apart,
 but the jaw faces close in well ahead of them; the real usable opening is about 50 mm. Every prop
 is sized to fit inside that. A wider plate is not a harder version of this task — it is an
