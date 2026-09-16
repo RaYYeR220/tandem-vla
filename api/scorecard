@@ -1,168 +1,170 @@
 {
-  "config": {
-    "seeds": [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19
-    ],
-    "n": 20,
-    "instruction": "set the table for one and pour me some water",
-    "dr_scale": 1.0,
-    "planner": "deterministic-expansion",
-    "world_state": "privileged simulator"
-  },
-  "task_success": {
-    "all_subgoals": 0,
-    "place_setting_complete": 6,
-    "rate_all": 0.0,
-    "rate_setting": 0.3
-  },
-  "subgoals": {
-    "drawer_opened": {
-      "count": 20,
-      "rate": 1.0
+  "available": true,
+  "scorecard": {
+    "config": {
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "n": 20,
+      "instruction": "set the table for one and pour me some water",
+      "dr_scale": 1.0,
+      "planner": "deterministic-expansion",
+      "world_state": "privileged simulator"
     },
-    "plate_placed": {
-      "count": 18,
-      "rate": 0.9
+    "task_success": {
+      "all_subgoals": 0,
+      "place_setting_complete": 6,
+      "rate_all": 0.0,
+      "rate_setting": 0.3
     },
-    "fork_placed": {
-      "count": 18,
-      "rate": 0.9
+    "subgoals": {
+      "drawer_opened": {
+        "count": 20,
+        "rate": 1.0
+      },
+      "plate_placed": {
+        "count": 18,
+        "rate": 0.9
+      },
+      "fork_placed": {
+        "count": 18,
+        "rate": 0.9
+      },
+      "spoon_placed": {
+        "count": 13,
+        "rate": 0.65
+      },
+      "mug_placed": {
+        "count": 11,
+        "rate": 0.55
+      },
+      "carton_emptied": {
+        "count": 11,
+        "rate": 0.55
+      },
+      "water_in_cup": {
+        "count": 0,
+        "rate": 0.0
+      }
     },
-    "spoon_placed": {
-      "count": 13,
-      "rate": 0.65
+    "subgoal_fraction": {
+      "mean": 0.65,
+      "median": 0.714,
+      "min": 0.286,
+      "max": 0.857
     },
-    "mug_placed": {
-      "count": 11,
-      "rate": 0.55
+    "skills": {
+      "open_drawer": {
+        "planned": 20,
+        "executed": 20,
+        "ok": 20,
+        "first_try": 20,
+        "gate_blocked": 0,
+        "rate": 1.0,
+        "first_try_rate": 1.0
+      },
+      "pick": {
+        "planned": 397,
+        "executed": 191,
+        "ok": 101,
+        "first_try": 91,
+        "gate_blocked": 206,
+        "rate": 0.529,
+        "first_try_rate": 0.476
+      },
+      "handoff": {
+        "planned": 159,
+        "executed": 86,
+        "ok": 74,
+        "first_try": 74,
+        "gate_blocked": 73,
+        "rate": 0.86,
+        "first_try_rate": 0.86
+      },
+      "place": {
+        "planned": 162,
+        "executed": 87,
+        "ok": 67,
+        "first_try": 67,
+        "gate_blocked": 75,
+        "rate": 0.77,
+        "first_try_rate": 0.77
+      },
+      "hold": {
+        "planned": 145,
+        "executed": 136,
+        "ok": 136,
+        "first_try": 136,
+        "gate_blocked": 9,
+        "rate": 1.0,
+        "first_try_rate": 1.0
+      },
+      "pour": {
+        "planned": 145,
+        "executed": 133,
+        "ok": 0,
+        "first_try": 0,
+        "gate_blocked": 12,
+        "rate": 0.0,
+        "first_try_rate": 0.0
+      },
+      "home": {
+        "planned": 36,
+        "executed": 36,
+        "ok": 36,
+        "first_try": 36,
+        "gate_blocked": 0,
+        "rate": 1.0,
+        "first_try_rate": 1.0
+      }
     },
-    "carton_emptied": {
-      "count": 10,
-      "rate": 0.5
+    "failures": {
+      "pick:GRIPPER_FULL": 196,
+      "pour:OUT_OF_REACH": 82,
+      "pick:OUT_OF_REACH": 82,
+      "place:GRIPPER_EMPTY": 75,
+      "handoff:GRIPPER_EMPTY": 73,
+      "pour:POUR_MISSED": 51,
+      "pick:GRASP_FAILED": 18,
+      "place:PLACE_MISSED": 11,
+      "handoff:OUT_OF_REACH": 10,
+      "place:OUT_OF_REACH": 9,
+      "hold:GRIPPER_EMPTY": 9,
+      "pour:GRIPPER_EMPTY": 8,
+      "pour:NO_HOLDER_FOR_POUR": 4,
+      "handoff:GRASP_FAILED": 2
     },
-    "water_in_cup": {
-      "count": 0,
-      "rate": 0.0
+    "handoff_modes": {
+      "relay": 86
+    },
+    "gate_refusals": 375,
+    "replans": 224,
+    "water": {
+      "mean_units_in_mug": 0.0,
+      "mean_spilled": 6.0
+    },
+    "episode_seconds": {
+      "mean": 108.6,
+      "max": 318.1
     }
-  },
-  "subgoal_fraction": {
-    "mean": 0.643,
-    "median": 0.714,
-    "min": 0.286,
-    "max": 0.857
-  },
-  "skills": {
-    "open_drawer": {
-      "planned": 20,
-      "executed": 20,
-      "ok": 20,
-      "first_try": 20,
-      "gate_blocked": 0,
-      "rate": 1.0,
-      "first_try_rate": 1.0
-    },
-    "pick": {
-      "planned": 368,
-      "executed": 192,
-      "ok": 102,
-      "first_try": 92,
-      "gate_blocked": 176,
-      "rate": 0.531,
-      "first_try_rate": 0.479
-    },
-    "handoff": {
-      "planned": 160,
-      "executed": 86,
-      "ok": 74,
-      "first_try": 74,
-      "gate_blocked": 74,
-      "rate": 0.86,
-      "first_try_rate": 0.86
-    },
-    "place": {
-      "planned": 159,
-      "executed": 84,
-      "ok": 66,
-      "first_try": 66,
-      "gate_blocked": 75,
-      "rate": 0.786,
-      "first_try_rate": 0.786
-    },
-    "hold": {
-      "planned": 119,
-      "executed": 107,
-      "ok": 107,
-      "first_try": 107,
-      "gate_blocked": 12,
-      "rate": 1.0,
-      "first_try_rate": 1.0
-    },
-    "pour": {
-      "planned": 119,
-      "executed": 104,
-      "ok": 0,
-      "first_try": 0,
-      "gate_blocked": 15,
-      "rate": 0.0,
-      "first_try_rate": 0.0
-    },
-    "home": {
-      "planned": 32,
-      "executed": 32,
-      "ok": 32,
-      "first_try": 32,
-      "gate_blocked": 0,
-      "rate": 1.0,
-      "first_try_rate": 1.0
-    }
-  },
-  "failures": {
-    "pick:GRIPPER_FULL": 166,
-    "pick:OUT_OF_REACH": 82,
-    "place:GRIPPER_EMPTY": 75,
-    "handoff:GRIPPER_EMPTY": 72,
-    "pour:OUT_OF_REACH": 57,
-    "pour:POUR_MISSED": 47,
-    "pick:GRASP_FAILED": 18,
-    "hold:GRIPPER_EMPTY": 12,
-    "pour:GRIPPER_EMPTY": 11,
-    "place:PLACE_MISSED": 10,
-    "handoff:OUT_OF_REACH": 10,
-    "place:OUT_OF_REACH": 8,
-    "pour:NO_HOLDER_FOR_POUR": 4,
-    "handoff:GRIPPER_FULL": 2,
-    "handoff:GRASP_FAILED": 2
-  },
-  "handoff_modes": {
-    "relay": 86
-  },
-  "gate_refusals": 352,
-  "replans": 200,
-  "water": {
-    "mean_units_in_mug": 0.1,
-    "mean_spilled": 5.55
-  },
-  "episode_seconds": {
-    "mean": 96.5,
-    "max": 226.9
   }
 }
