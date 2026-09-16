@@ -81,7 +81,7 @@ git clone <this repo> && cd tandem
 python -m venv .venv && .venv/Scripts/activate       # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 
-pytest tandem/ -q                                     # 81 tests, ~13 s
+pytest tandem/ -q                                     # 85 tests, ~13 s
 python -m tandem.sim.scene                            # compile the cell, print its dimensions
 python scripts/eval_gate.py                           # grade the safety gate (1 s)
 python scripts/evaluate.py --seeds 20 --out results/eval   # the task scorecard
