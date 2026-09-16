@@ -85,6 +85,9 @@ python scripts/eval_gate.py                           # grade the safety gate (1
 python scripts/evaluate.py --seeds 20 --out results/eval   # the task scorecard
 python scripts/benchmark_intel.py                     # OpenVINO device + latency report
 python scripts/serve.py                               # the live dashboard on :8000
+
+# The whole product in one command: speech in, cutlery on the table.
+python scripts/voice_to_table.py --audio assets/audio/set_the_table.wav --seed 1
 ```
 
 Nothing above needs an API key, a GPU, or a model download. The language planner falls back to
@@ -94,6 +97,12 @@ never pretends a model ran.
 ---
 
 ## How it works
+
+### 0. End to end
+`scripts/voice_to_table.py` is the product in one command. It streams audio to Speechmatics,
+takes the final transcript as the instruction, parses it locally through OpenVINO, expands it into
+a plan against the current scene, gates every step, and runs it on the arms — printing at each
+stage which backend actually served it. A captured run is in `results/voice_episode_log.txt`.
 
 ### 1. Speech — Speechmatics realtime
 `tandem/voice/` streams microphone or WAV audio to Speechmatics' realtime API and emits partial

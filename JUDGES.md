@@ -34,7 +34,18 @@ scroll past; a scorecard lands in `results/eval/scorecard.md` and every step of 
 it. The run reports failures as prominently as successes — including the pour, which does not
 work, and says why.
 
-## 3. The live dashboard (≈1 minute)
+## 3. Speech to cutlery, in one command (≈3 minutes)
+
+```bash
+python scripts/voice_to_table.py --audio assets/audio/set_the_table.wav --seed 1
+```
+
+Partials stream in and settle into *"Set the table for one, please."*; a 1.5B model quantized to
+INT4 parses that into an intent locally; the plan is expanded against the scene and gated step by
+step; the arms run it. Each stage prints the backend that served it. With no API key it falls back
+to a scripted transcript and a keyword parser, and says so rather than pretending.
+
+## 4. The live dashboard (≈1 minute)
 
 ```bash
 python scripts/serve.py          # then open http://localhost:8000/app.html
@@ -44,7 +55,7 @@ Pick a seed, press run. The plan tree fills in, each step stamped by the gate as
 with the inference HUD showing which model ran on which device at which precision. Ask for
 something impossible and watch the refusal land.
 
-## 4. The Intel story
+## 5. The Intel story
 
 ```bash
 python scripts/benchmark_intel.py
